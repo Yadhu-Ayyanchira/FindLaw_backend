@@ -11,7 +11,6 @@ const userSchema = new mongoose.Schema({
   },
   mobile: {
     type: String,
-    required: true,
   },
   password: {
     type: String,
@@ -19,9 +18,12 @@ const userSchema = new mongoose.Schema({
   },
   flc: {
     type: String,
-    required: false,
   },
   is_blocked: {
+    type: Boolean,
+    default: false,
+  },
+  verified: {
     type: Boolean,
     default: false,
   },

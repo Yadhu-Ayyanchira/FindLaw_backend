@@ -1,33 +1,123 @@
-import User from '../Models/UserModel.js'
-import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
+import User from "../Models/UserModel.js";
+import Token from "../Models/TokenModel.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import sendMail from '../Utils/SendMail.js'
+import crypto from "crypto";
 
-const signup = async (req,res,next) => {
-    try {
-        console.log('in useReg');
-        const { name, email, password, mobile } = req.body;
-        const exists = await User.findOne({email:email})
-        if (exists) {
-            console.log("email already exists");
-          return res.status(200).json({ message: "Email already Exists", status: false });
-        }else{
-            const hash = await bcrypt.hash(password,10)
-            const newuser = await User.create({name:name,email:email,password:hash,mobile:mobile,is_admin:false})
-            const token = jwt.sign({userId:newuser._id},process.env.JWTKEY,{expiresIn: '1min'});
-            return res.status(200).json({token:token,user:newuser,alert:'Registerd',status:true})
-        }
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: "Internal Server Error" });
+const signup = async (req, res, next) => {
+  try {
+    console.log("in useReg");
+    const { name, email, password, mobile } = req.body;
+    const exists = await User.findOne({ email: email });
+    if (exists) {
+      console.log("email already exists");
+      return res
+        .status(200)
+        .json({ message: "Email already Exists", created: false });
+    } else {
+      const hash = await bcrypt.hash(password, 10);
+      const newUser = new User({
+        name: name,
+        email: email,
+        mobile: mobile,
+        password: hash,
+      });
+      let user = await newUser.save().then(console.log("Registered"));
+
+      const emailtoken = await new Token({
+        userId : user._id,
+        token: crypto.randomBytes(32).toString("hex"),
+      }).save();
+        const url = `${process.env.SERVERURL}/${user._id}/verify/${emailtoken.token}`
+        await sendMail(user.email, "Verify Email", url);
+        console.log("email Succes");
+      return res
+        .status(200)
+        .json({
+          token: emailtoken,
+          user: user,
+          message: "Registerd",
+          created: true,
+        });
     }
-}
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
-const login = async (req,res,next)=>{
-    console.log("objectsss"+data);
-    console.log('hey im doneeee');
-}
+const verification = async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.params.id });
+    if (!user) {
+      return res.status(400).json({ message: "invalid link" });
+    }
+    const token = await Token.findOne({
+      userId: user._id,
+      token: req.params.token,
+    });
+    if (!token) {
+      return res.status(400).json({ message: "invalid link" });
+    }
+    await User.updateOne({ _id: user._id }, { $set: { verified: true } });
+    await Token.deleteOne({ _id: token._id });
 
-export default{
-    login,
-    signup
-}
+    const jwtToken = jwt.sign({ _id: user._id }, process.env.JWTKEY, {
+      expiresIn: "24hr",
+    });
+    const redirectUrl = process.env.REDIRECTURL;
+    res.redirect(redirectUrl);
+    // res.status(200).json({user:user,jwtToken,message:"email verification success"})
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "internal server error" });
+  }
+};
+
+const login = async (req, res, next) => {
+ 
+  console.log("hey im doneeee");
+};
+
+const SignupWithGoogle = async (req, res, next) => {
+  try {
+     console.log("SignupWithGoogle");
+     const { name, email, id } = req.body;
+     const exist = await User.findOne({ email: email });
+      if (exist) {
+        return res
+          .status(200)
+          .json({ created: false, message: "email Already exists" });
+      } else {
+        const hash = await bcrypt.hash(id, 10);
+        const newUser = new User({
+          name: name,
+          email: email,
+          password: hash,
+        });
+        let user = await newUser.save().then(console.log("saved"));
+        await User.updateOne({ _id: user._id }, { $set: { verified: true } });
+        const token = jwt.sign({ userId: user._id }, process.env.JWTKEY, {
+          expiresIn: "24hr",
+        });
+        return res
+          .status(200)
+          .json({
+            created: true,
+            token: token,
+            user,
+            message: "Account Registered",
+          });
+      }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+export default {
+  login,
+  signup,
+  SignupWithGoogle,
+  verification,
+};
