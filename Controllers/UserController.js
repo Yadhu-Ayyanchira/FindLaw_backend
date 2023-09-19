@@ -75,10 +75,63 @@ const verification = async (req, res) => {
   }
 };
 
+// const login = async (req, res, next) => {
+//  try {
+//   const { email, pass } = req.body;
+//   console.log("req.body.email", email);
+//    const user = await User.findOne({ email: req.body.email });
+//    if (!user)
+//      return res.status(201).json({ access: false, message: "User not found" });
+
+//    const isCorrect = bcrypt.compareSync(pass, user.password);
+//    if (!isCorrect)
+//      return res
+//        .status(201)
+//        .json({ access: false, message: "wrong password or username!" });
+
+//    const token = jwt.sign(
+//      { userId: user._id, },
+//      process.env.JWTKEY,
+//      { expiresIn: "24hr" }
+//    );
+
+//    const { password, ...info } = user._doc;
+//    return res
+//      .status(200)
+//      .json({ access: true, token, info, message: "logged in successfully" });
+//  } catch (err) {
+//    next(err);
+//  }
+// };
+
 const login = async (req, res, next) => {
- 
-  console.log("hey im doneeee");
+  try {
+    const { email, password } = req.body; // Retrieve email and password from request body
+    console.log("req.body.email", email);
+
+    const user = await User.findOne({ email }); // Search for user by email
+    if (!user)
+      return res.status(201).json({ access: false, message: "User not found" });
+
+    const isCorrect = bcrypt.compareSync(password, user.password); // Compare passwords
+    if (!isCorrect)
+      return res
+        .status(201)
+        .json({ access: false, message: "Wrong password or username!" });
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWTKEY, {
+      expiresIn: "24hr",
+    });
+
+    const { pass, ...info } = user._doc; // Exclude password from response
+    return res
+      .status(200)
+      .json({ access: true, token, info, message: "Logged in successfully" });
+  } catch (err) {
+    next(err);
+  }
 };
+
 
 const SignupWithGoogle = async (req, res, next) => {
   try {
