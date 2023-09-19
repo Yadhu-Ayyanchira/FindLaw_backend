@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import bodyParser from "body-parser";
 import UserRoutes from './Routes/UserRoute.js'
+import AdminRoutes from './Routes/AdminRoute.js'
 dotenv.config();
 
 const app = express();
@@ -12,6 +13,7 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/", UserRoutes);
+app.use("/admin", AdminRoutes);
 
 mongoose
   .connect(process.env.MONGO_URL, {
