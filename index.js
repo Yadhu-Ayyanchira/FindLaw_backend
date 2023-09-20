@@ -5,6 +5,7 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import UserRoutes from './Routes/UserRoute.js'
 import AdminRoutes from './Routes/AdminRoute.js'
+import LawyerRoutes from "./Routes/LawyerRoute.js";
 dotenv.config();
 
 const app = express();
@@ -14,6 +15,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/", UserRoutes);
 app.use("/admin", AdminRoutes);
+app.use("/lawyer", LawyerRoutes);
 
 mongoose
   .connect(process.env.MONGO_URL, {
