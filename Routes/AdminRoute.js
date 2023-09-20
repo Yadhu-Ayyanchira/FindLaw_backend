@@ -1,6 +1,7 @@
 import Express from "express";
-import AdminController from '../Controllers/AdminController' 
 const AdminRout = Express.Router();
+import AdminController from "../Controllers/AdminController.js"; 
 
-AdminRout.post("/login",()=>console.log('hello admin backend'))
+AdminRout.post("/login",AdminController.login)
 
+export default AdminRout;
