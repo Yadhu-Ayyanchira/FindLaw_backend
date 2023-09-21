@@ -30,7 +30,7 @@ const register = async (req, res, next) =>{
             userId: lawyer._id,
             token: crypto.randomBytes(32).toString("hex"),
           }).save();
-          const url = `${process.env.SERVERURL}/${lawyer._id}/verify/${emailtoken.token}`;
+          const url = `lawyer/${process.env.SERVERURL}/${lawyer._id}/verify/${emailtoken.token}`;
           await sendMail(lawyer.email, "Verify Email", url);
           console.log("email Succes");
           return res.status(200).json({
@@ -75,7 +75,70 @@ const verification = async (req, res) => {
   }
 };
 
+const SignupWithGoogle = async (req, res, next) => {
+  try {
+    console.log("SignupWithGoogle lawyer");
+    const { name, email, id } = req.body;
+    const exist = await Lawyer.findOne({ email: email });
+    if (exist) {
+      return res
+        .status(200)
+        .json({ created: false, message: "email Already exists" });
+    } else {
+      const hash = await bcrypt.hash(id, 10);
+      const newUser = new Lawyer({
+        name: name,
+        email: email,
+        password: hash,
+      });
+      let user = await newUser.save().then(console.log("saved"));
+      await Lawyer.updateOne({ _id: user._id }, { $set: { verified: true } });
+      const token = jwt.sign({ userId: user._id }, process.env.JWTKEY, {
+        expiresIn: "24hr",
+      });
+      return res.status(200).json({
+        created: true,
+        token: token,
+        user,
+        message: "Account Registered",
+      });
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const login = async (req,res,next) =>{
+  try {
+    console.log('djcbd');
+    const { email, password } = req.body;
+    console.log('email',email);
+    const user = await Lawyer.findOne({ email });
+    if (!user)
+      return res.status(201).json({ access: false, message: "User not found" });
+
+    const isCorrect = bcrypt.compareSync(password, user.password); 
+    if (!isCorrect)
+      return res
+        .status(201)
+        .json({ access: false, message: "Wrong password or username!" });
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWTKEY, {
+      expiresIn: "24hr",
+    });
+
+    const { pass, ...info } = user._doc;
+    return res
+      .status(200)
+      .json({ access: true, token, info, message: "Logged in successfully" });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export default{
     register,
-    verification
+    verification,
+    SignupWithGoogle,
+    login
 }
