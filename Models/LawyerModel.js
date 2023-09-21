@@ -16,7 +16,10 @@ const lawyerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  flc: {
+  brn: {
+    type: String,
+  },
+  about: {
     type: String,
   },
   is_blocked: {
@@ -24,10 +27,6 @@ const lawyerSchema = new mongoose.Schema({
     default: false,
   },
   verified: {
-    type: Boolean,
-    default: false,
-  },
-  is_admin: {
     type: Boolean,
     default: false,
   },
