@@ -96,7 +96,7 @@ const login = async (req, res, next) => {
     const { pass, ...info } = user._doc;
     return res
       .status(200)
-      .json({ access: true, token, info, message: "Logged in successfully" });
+      .json({ access: true, token, info, message: "Logged in successfully" })
   } catch (err) {
     next(err);
   }

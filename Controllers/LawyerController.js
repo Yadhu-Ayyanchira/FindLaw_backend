@@ -10,12 +10,12 @@ const register = async (req, res, next) =>{
     try {
         console.log("in lawyer Reg");
         const { name, email, password, mobile } = req.body;
-        const exists = await Lawyer.findOne({ email: email });
+        const exists = await Lawyer.findOne({ email: email })
         if (exists) {
           console.log("email already exists");
           return res
             .status(200)
-            .json({ message: "Email already Exists", created: false });
+            .json({ message: "Email already Exists", created: false })
         } else {
           const hash = await bcrypt.hash(password, 10);
           const newUser = new Lawyer({
