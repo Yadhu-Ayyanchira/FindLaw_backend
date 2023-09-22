@@ -39,6 +39,18 @@ const login = async (req, res, next) => {
     }
 }
 
+const getUsers = async (req,res,next) =>{
+  try {
+    console.log('get users');
+    const users = await User.find({is_admin : false})
+    return res.status(200).json({data : users})
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+}
+
 export default {
-    login
+    login,
+    getUsers
 }
