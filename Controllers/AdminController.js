@@ -1,4 +1,5 @@
 import User from "../Models/UserModel.js";
+import Lawyer from "../Models/LawyerModel.js";
 import Token from "../Models/TokenModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -51,17 +52,37 @@ const getUsers = async (req,res,next) =>{
 }
 const getLawyers = async (req,res,next) =>{
   try {
-    console.log('get users');
-    const users = await User.find({is_admin : false})
+    console.log('get lawyers');
+    const users = await Lawyer.find()
     return res.status(200).json({data : users})
   } catch (error) {
     console.log(error)
     next(error)
   }
 }
+const manageLawyers = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const user = await Lawyer.findById(id);
+    if (user) {
+      await Lawyer.updateOne(
+        { _id: id },
+        { $set: { is_blocked: !user.is_blocked } }
+      );
+      res
+        .status(200)
+        .json({ message: user.is_blocked ? "User Blocked" : "User UnBlocked" });
+    } else {
+      res.status(404).json({ message: "usernot found" });
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+}
 
 export default {
     login,
     getUsers,
-    getLawyers
+    getLawyers,
+    manageLawyers
 }
