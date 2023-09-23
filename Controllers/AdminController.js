@@ -79,10 +79,31 @@ const manageLawyers = async (req, res, next) => {
     console.log(error.message);
   }
 }
+const manageUsers = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    console.log("user id",id);
+    const user = await User.findById(id);
+    if (user) {
+      await User.updateOne(
+        { _id: id },
+        { $set: { is_blocked: !user.is_blocked } }
+      );
+      res
+        .status(200)
+        .json({ message: user.is_blocked ? "User Blocked" : "User UnBlocked" });
+    } else {
+      res.status(404).json({ message: "usernot found" });
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+}
 
 export default {
     login,
     getUsers,
     getLawyers,
-    manageLawyers
+    manageLawyers,
+    manageUsers
 }
