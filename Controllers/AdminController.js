@@ -100,10 +100,25 @@ const manageUsers = async (req, res, next) => {
   }
 }
 
+// const logout = async (req, res, next) => {
+//   try {
+//    return res
+//       .clearCookie("currentAdmin", {
+//         sameSite: "none",
+//         secure: true,
+//       })
+//       .status(200)
+//       .send("user has been logged out");
+//   } catch (error) {
+//     console.log(error);
+//     next(error)
+//   }
+// }
+
 export default {
     login,
     getUsers,
     getLawyers,
     manageLawyers,
-    manageUsers
+    manageUsers,
 }

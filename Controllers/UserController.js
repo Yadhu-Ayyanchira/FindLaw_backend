@@ -76,14 +76,17 @@ const verification = async (req, res) => {
 
 const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body; // Retrieve email and password from request body
+    const { email, password } = req.body;
     console.log("req.body.email", email);
 
-    const user = await User.findOne({ email }); // Search for user by email
+    const user = await User.findOne({ email });
     if (!user)
       return res.status(201).json({ access: false, message: "User not found" });
-
-    const isCorrect = bcrypt.compareSync(password, user.password); // Compare passwords
+    if(user.is_blocked){
+      console.log('bloked');
+      return res.status(201).json({ access: false, message: "User Blocked" });
+    }
+    const isCorrect = bcrypt.compareSync(password, user.password);
     if (!isCorrect)
       return res
         .status(201)
