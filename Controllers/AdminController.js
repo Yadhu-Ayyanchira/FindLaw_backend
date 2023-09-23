@@ -88,7 +88,7 @@ const manageUsers = async (req, res, next) => {
       await User.updateOne(
         { _id: id },
         { $set: { is_blocked: !user.is_blocked } }
-      );
+      )
       res
         .status(200)
         .json({ message: user.is_blocked ? "User Blocked" : "User UnBlocked" });
@@ -99,21 +99,6 @@ const manageUsers = async (req, res, next) => {
     console.log(error.message);
   }
 }
-
-// const logout = async (req, res, next) => {
-//   try {
-//    return res
-//       .clearCookie("currentAdmin", {
-//         sameSite: "none",
-//         secure: true,
-//       })
-//       .status(200)
-//       .send("user has been logged out");
-//   } catch (error) {
-//     console.log(error);
-//     next(error)
-//   }
-// }
 
 export default {
     login,

@@ -7,7 +7,6 @@ AdminRout.get('/users',AdminController.getUsers)
 AdminRout.get('/lawyers',AdminController.getLawyers)
 AdminRout.put("/managelawyer/:id", AdminController.manageLawyers);
 AdminRout.put("/manageuser/:id", AdminController.manageUsers);
-//AdminRout.get('/logout',AdminController.logout)
 
 
 export default AdminRout;
