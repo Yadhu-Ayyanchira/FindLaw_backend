@@ -95,11 +95,11 @@ const login = async (req, res, next) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWTKEY, {
       expiresIn: "24hr",
     });
-
     const { pass, ...info } = user._doc;
+    console.log(info);
     return res
       .status(200)
-      .json({ access: true, token, info, message: "Logged in successfully" })
+      .json({ access: true, token, info:user, message: "Logged in successfully" })
   } catch (err) {
     next(err);
   }
