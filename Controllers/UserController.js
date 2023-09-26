@@ -73,7 +73,6 @@ const verification = async (req, res) => {
   }
 };
 
-
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -82,8 +81,8 @@ const login = async (req, res, next) => {
     const user = await User.findOne({ email });
     if (!user)
       return res.status(201).json({ access: false, message: "User not found" });
-    if(user.is_blocked){
-      console.log('bloked');
+    if (user.is_blocked) {
+      console.log("bloked");
       return res.status(201).json({ access: false, message: "User Blocked" });
     }
     const isCorrect = bcrypt.compareSync(password, user.password);
@@ -99,7 +98,12 @@ const login = async (req, res, next) => {
     console.log(info);
     return res
       .status(200)
-      .json({ access: true, token, info:user, message: "Logged in successfully" })
+      .json({
+        access: true,
+        token,
+        info: user,
+        message: "Logged in successfully",
+      });
   } catch (err) {
     next(err);
   }

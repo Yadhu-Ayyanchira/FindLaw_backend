@@ -5,50 +5,49 @@ import jwt from "jsonwebtoken";
 import sendMail from "../Utils/SendMail.js";
 import crypto from "crypto";
 
+const register = async (req, res, next) => {
+  try {
+    console.log("in lawyer Reg");
+    const { name, email, password, mobile } = req.body;
+    const exists = await Lawyer.findOne({ email: email });
+    if (exists) {
+      console.log("email already exists");
+      return res
+        .status(200)
+        .json({ message: "Email already Exists", created: false });
+    } else {
+      const hash = await bcrypt.hash(password, 10);
+      const newUser = new Lawyer({
+        name: name,
+        email: email,
+        mobile: mobile,
+        password: hash,
+      });
+      let lawyer = await newUser.save().then(console.log("Registered"));
 
-const register = async (req, res, next) =>{
-    try {
-        console.log("in lawyer Reg");
-        const { name, email, password, mobile } = req.body;
-        const exists = await Lawyer.findOne({ email: email })
-        if (exists) {
-          console.log("email already exists");
-          return res
-            .status(200)
-            .json({ message: "Email already Exists", created: false })
-        } else {
-          const hash = await bcrypt.hash(password, 10);
-          const newUser = new Lawyer({
-            name: name,
-            email: email,
-            mobile: mobile,
-            password: hash,
-          });
-          let lawyer = await newUser.save().then(console.log("Registered"));
-
-          const emailtoken = await new Token({
-            userId: lawyer._id,
-            token: crypto.randomBytes(32).toString("hex"),
-          }).save();
-          const url = `lawyer/${process.env.SERVERURL}/${lawyer._id}/verify/${emailtoken.token}`;
-          await sendMail(lawyer.email, "Verify Email", url);
-          console.log("email Succes");
-          return res.status(200).json({
-            token: emailtoken,
-            user: lawyer,
-            message: "Registerd",
-            created: true,
-          });
-        }
-    } catch (error) {
-        onsole.log(error);
-        return res.status(500).json({ message: "internal server error" });
+      const emailtoken = await new Token({
+        userId: lawyer._id,
+        token: crypto.randomBytes(32).toString("hex"),
+      }).save();
+      const url = `lawyer/${process.env.SERVERURL}/${lawyer._id}/verify/${emailtoken.token}`;
+      await sendMail(lawyer.email, "Verify Email", url);
+      console.log("email Succes");
+      return res.status(200).json({
+        token: emailtoken,
+        user: lawyer,
+        message: "Registerd",
+        created: true,
+      });
     }
-}
+  } catch (error) {
+    onsole.log(error);
+    return res.status(500).json({ message: "internal server error" });
+  }
+};
 
 const verification = async (req, res) => {
   try {
-      console.log('lawyer is');
+    console.log("lawyer is");
     const lawyer = await Lawyer.findOne({ _id: req.params.id });
     if (!lawyer) {
       return res.status(400).json({ message: "invalid link" });
@@ -108,16 +107,16 @@ const SignupWithGoogle = async (req, res, next) => {
   }
 };
 
-const login = async (req,res,next) =>{
+const login = async (req, res, next) => {
   try {
-    console.log('djcbd');
+    console.log("djcbd");
     const { email, password } = req.body;
-    console.log('email',email);
+    console.log("email", email);
     const user = await Lawyer.findOne({ email });
     if (!user)
       return res.status(201).json({ access: false, message: "User not found" });
 
-    const isCorrect = bcrypt.compareSync(password, user.password); 
+    const isCorrect = bcrypt.compareSync(password, user.password);
     if (!isCorrect)
       return res
         .status(201)
@@ -134,11 +133,11 @@ const login = async (req,res,next) =>{
   } catch (err) {
     next(err);
   }
-}
+};
 
-export default{
-    register,
-    verification,
-    SignupWithGoogle,
-    login
-}
+export default {
+  register,
+  verification,
+  SignupWithGoogle,
+  login,
+};
