@@ -22,6 +22,14 @@ const lawyerSchema = new mongoose.Schema({
   about: {
     type: String,
   },
+  place: {
+    type: [String],
+    default: [],
+  },
+  practice: {
+    type: [String],
+    default: [],
+  },
   is_blocked: {
     type: Boolean,
     default: false,
