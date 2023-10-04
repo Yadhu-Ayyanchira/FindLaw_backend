@@ -77,6 +77,28 @@ const manageLawyers = async (req, res, next) => {
     console.log(error.message);
   }
 };
+
+const getLawyerRequests = async (req, res, next) => {
+  try {
+    const users = await Lawyer.find({ is_approved: false });
+    return res.status(200).json({ data: users });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+const approveLawyer = async(req, res, next) => {
+  try {
+    console.log("approve lawyer");
+    const id = req.params.id
+    const user = await Lawyer.findByIdAndUpdate(id,{is_approved:true})
+    res.status(200).json({ message: "Lawyer Approved" });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+}
+
 const manageUsers = async (req, res, next) => {
   try {
     const id = req.params.id;
@@ -104,4 +126,6 @@ export default {
   getLawyers,
   manageLawyers,
   manageUsers,
+  getLawyerRequests,
+  approveLawyer,
 };
