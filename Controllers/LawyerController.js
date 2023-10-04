@@ -29,7 +29,7 @@ const register = async (req, res, next) => {
         userId: lawyer._id,
         token: crypto.randomBytes(32).toString("hex"),
       }).save();
-      const url = `lawyer/${process.env.SERVERURL}/${lawyer._id}/verify/${emailtoken.token}`;
+      const url = `${process.env.SERVERURL}/lawyer/${lawyer._id}/verify/${emailtoken.token}`;
       await sendMail(lawyer.email, "Verify Email", url);
       console.log("email Succes");
       return res.status(200).json({
@@ -65,7 +65,7 @@ const verification = async (req, res) => {
     const jwtToken = jwt.sign({ _id: lawyer._id }, process.env.JWTKEY, {
       expiresIn: "24hr",
     });
-    const redirectUrl = process.env.REDIRECTURL;
+    const redirectUrl = process.env.LAWYERREDIRECTURL;
     res.redirect(redirectUrl);
     // res.status(200).json({user:user,jwtToken,message:"email verification success"})
   } catch (error) {
@@ -115,7 +115,12 @@ const login = async (req, res, next) => {
     const user = await Lawyer.findOne({ email });
     if (!user)
       return res.status(201).json({ access: false, message: "User not found" });
-
+    if(user.verified==false)
+      return res.status(201).json({ access: false, message: "User not verified" });
+    if (user.is_blocked) {
+      console.log("bloked");
+      return res.status(201).json({ access: false, message: "User Blocked" });
+    }
     const isCorrect = bcrypt.compareSync(password, user.password);
     if (!isCorrect)
       return res
@@ -126,10 +131,10 @@ const login = async (req, res, next) => {
       expiresIn: "24hr",
     });
 
-    const { pass, ...info } = user._doc;
+    // const { pass, ...info } = user._doc;
     return res
       .status(200)
-      .json({ access: true, token, info, message: "Logged in successfully" });
+      .json({ access: true, token, info:user, message: "Logged in successfully" });
   } catch (err) {
     next(err);
   }

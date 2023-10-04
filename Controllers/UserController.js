@@ -81,6 +81,10 @@ const login = async (req, res, next) => {
     const user = await User.findOne({ email });
     if (!user)
       return res.status(201).json({ access: false, message: "User not found" });
+    if (user.verified==false)
+      return res
+        .status(201)
+        .json({ access: false, message: "User not verified" });
     if (user.is_blocked) {
       console.log("bloked");
       return res.status(201).json({ access: false, message: "User Blocked" });
@@ -94,8 +98,8 @@ const login = async (req, res, next) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWTKEY, {
       expiresIn: "24hr",
     });
-    const { pass, ...info } = user._doc;
-    console.log(info);
+    // const { pass, ...info } = user._doc;
+    
     return res
       .status(200)
       .json({

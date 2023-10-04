@@ -36,7 +36,7 @@ const lawyerSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  ia_approved: {
+  is_approved: {
     type: Boolean,
     default: false,
   },

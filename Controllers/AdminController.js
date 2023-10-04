@@ -51,7 +51,7 @@ const getUsers = async (req, res, next) => {
 const getLawyers = async (req, res, next) => {
   try {
     console.log("get lawyers");
-    const users = await Lawyer.find();
+    const users = await Lawyer.find({ is_approved:true });
     return res.status(200).json({ data: users });
   } catch (error) {
     console.log(error);
