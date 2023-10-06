@@ -121,11 +121,11 @@ const login = async (req, res, next) => {
       console.log("bloked");
       return res.status(201).json({ access: false, message: "User Blocked" });
     }
-    const isCorrect = bcrypt.compareSync(password, user.password);
+    const isCorrect = bcrypt.compareSync(password, user.password)
     if (!isCorrect)
       return res
         .status(201)
-        .json({ access: false, message: "Wrong password or username!" });
+        .json({ access: false, message: "Wrong password or username!" })
 
     const token = jwt.sign({ userId: user._id }, process.env.JWTKEY, {
       expiresIn: "24hr",
@@ -134,7 +134,7 @@ const login = async (req, res, next) => {
     // const { pass, ...info } = user._doc;
     return res
       .status(200)
-      .json({ access: true, token, info:user, message: "Logged in successfully" });
+      .json({ access: true, token, info:user, message: "Logged in successfully" })
   } catch (err) {
     next(err);
   }

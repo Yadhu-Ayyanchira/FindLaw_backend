@@ -93,7 +93,7 @@ const login = async (req, res, next) => {
     if (!isCorrect)
       return res
         .status(201)
-        .json({ access: false, message: "Wrong password or username!" });
+        .json({ access: false, message: "Wrong password or username!" })
 
     const token = jwt.sign({ userId: user._id }, process.env.JWTKEY, {
       expiresIn: "24hr",

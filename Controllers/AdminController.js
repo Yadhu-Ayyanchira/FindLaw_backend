@@ -94,7 +94,7 @@ const approveLawyer = async(req, res, next) => {
     const user = await Lawyer.findByIdAndUpdate(id,{is_approved:true})
     res.status(200).json({ message: "Lawyer Approved" });
   } catch (error) {
-    console.log(error);
+    console.log(error)
     next(error);
   }
 }

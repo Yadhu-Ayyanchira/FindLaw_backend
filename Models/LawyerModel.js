@@ -48,4 +48,4 @@ const lawyerSchema = new mongoose.Schema({
 });
 
 const Lawyer = mongoose.model("Lawyer", lawyerSchema);
-export default Lawyer;
+export default Lawyer
