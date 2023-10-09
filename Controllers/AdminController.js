@@ -8,6 +8,7 @@ const login = async (req, res, next) => {
   try {
     console.log("wyd");
     const { email, password } = req.body;
+    console.log('object',email);
     const admin = await User.findOne({ email });
     if (!admin)
       return res.status(201).json({ access: false, message: "User not found" });
@@ -25,7 +26,7 @@ const login = async (req, res, next) => {
     } else {
       console.log("yesss");
       const token = jwt.sign({ userId: admin._id }, process.env.JWTKEY, {
-        expiresIn: "24hr",
+        expiresIn: 86400000,
       });
 
       const { pass, ...info } = admin._doc;
