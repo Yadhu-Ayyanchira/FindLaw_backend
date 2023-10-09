@@ -81,7 +81,7 @@ const login = async (req, res, next) => {
     const user = await User.findOne({ email });
     if (!user)
       return res.status(201).json({ access: false, message: "User not found" });
-    if (user.verified==false)
+    if (user.verified == false)
       return res
         .status(201)
         .json({ access: false, message: "User not verified" });
@@ -93,21 +93,19 @@ const login = async (req, res, next) => {
     if (!isCorrect)
       return res
         .status(201)
-        .json({ access: false, message: "Wrong password or username!" })
+        .json({ access: false, message: "Wrong password or username!" });
 
     const token = jwt.sign({ userId: user._id }, process.env.JWTKEY, {
       expiresIn: "24hr",
     });
     // const { pass, ...info } = user._doc;
-    
-    return res
-      .status(200)
-      .json({
-        access: true,
-        token,
-        info: user,
-        message: "Logged in successfully",
-      });
+
+    return res.status(200).json({
+      access: true,
+      token,
+      info: user,
+      message: "Logged in successfully",
+    });
   } catch (err) {
     next(err);
   }
