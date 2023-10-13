@@ -139,10 +139,26 @@ const login = async (req, res, next) => {
     next(err);
   }
 };
+const lawyerData = async (req,res,next) =>{
+try {
+  console.log("'im fking done...");
+  const id= req.params.id
+  console.log("'im fking done...",id);
+
+  const lawyer = await Lawyer.findById(id);
+  if(lawyer){
+    return res.status(200).json({ data: lawyer });
+  }
+} catch (error) {
+  next(error)
+  console.log(error);
+}
+}
 
 export default {
   register,
   verification,
   SignupWithGoogle,
   login,
+  lawyerData,
 };

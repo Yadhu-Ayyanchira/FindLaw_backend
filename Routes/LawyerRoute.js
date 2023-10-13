@@ -6,4 +6,5 @@ LawyerRoute.post("/register", LawyerController.register);
 LawyerRoute.get("/:id/verify/:token", LawyerController.verification);
 LawyerRoute.post("/googleSignup", LawyerController.SignupWithGoogle);
 LawyerRoute.post('/login',LawyerController.login)
+LawyerRoute.get("/lawyerData/:id", LawyerController.lawyerData);
 export default LawyerRoute;
