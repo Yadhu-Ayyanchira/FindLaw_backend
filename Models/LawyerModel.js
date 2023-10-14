@@ -24,6 +24,7 @@ const lawyerSchema = new mongoose.Schema({
   },
   place: {
     type: String,
+    default: "California"
   },
   practice: {
     type: String,

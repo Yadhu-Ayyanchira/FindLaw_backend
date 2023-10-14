@@ -143,7 +143,6 @@ const lawyerData = async (req,res,next) =>{
 try {
   console.log("'im fking done...");
   const id= req.params.id
-  console.log("'im fking done...",id);
 
   const lawyer = await Lawyer.findById(id);
   if(lawyer){
