@@ -104,6 +104,7 @@ const SignupWithGoogle = async (req, res, next) => {
     }
   } catch (error) {
     console.log(error.message);
+    next(error)
   }
 };
 
@@ -115,17 +116,19 @@ const login = async (req, res, next) => {
     const user = await Lawyer.findOne({ email });
     if (!user)
       return res.status(201).json({ access: false, message: "User not found" });
-    if(user.verified==false)
-      return res.status(201).json({ access: false, message: "User not verified" });
+    if (user.verified == false)
+      return res
+        .status(201)
+        .json({ access: false, message: "User not verified" });
     if (user.is_blocked) {
       console.log("bloked");
       return res.status(201).json({ access: false, message: "User Blocked" });
     }
-    const isCorrect = bcrypt.compareSync(password, user.password)
+    const isCorrect = bcrypt.compareSync(password, user.password);
     if (!isCorrect)
       return res
         .status(201)
-        .json({ access: false, message: "Wrong password or username!" })
+        .json({ access: false, message: "Wrong password or username!" });
 
     const token = jwt.sign({ userId: user._id }, process.env.JWTKEY, {
       expiresIn: "24hr",
@@ -134,25 +137,75 @@ const login = async (req, res, next) => {
     // const { pass, ...info } = user._doc;
     return res
       .status(200)
-      .json({ access: true, token, info:user, message: "Logged in successfully" });
+      .json({
+        access: true,
+        token,
+        info: user,
+        message: "Logged in successfully",
+      });
   } catch (err) {
     next(err);
   }
 };
-const lawyerData = async (req,res,next) =>{
-try {
-  console.log("'im fking done...");
-  const id= req.params.id
+const lawyerData = async (req, res, next) => {
+  try {
+    const id = req.params.id;
 
-  const lawyer = await Lawyer.findById(id);
-  if(lawyer){
-    return res.status(200).json({ data: lawyer });
+    const lawyer = await Lawyer.findById(id);
+    if (lawyer) {
+      return res.status(200).json({ data: lawyer });
+    }
+  } catch (error) {
+    next(error);
+    console.log(error);
   }
-} catch (error) {
-  next(error)
-  console.log(error);
-}
-}
+};
+
+// const profileEdit = async (req, res, next) => {
+//   try {
+//     const { name, place, experience, mobile } = req.body;
+//     console.log("backend profileEdit", name, place, experience, mobile);
+//     const lawyerId = req.params.id;
+//     let lawyer = await Lawyer.findByIdAndUpdate({_id:lawyerId}, {
+//       $set: { name, place, experience, mobile },
+//     });
+//     if (!lawyer) return res.send("no such lawyer");
+//     console.log(lawyer);
+//     return res.status(200).json({updated:true,data:lawyer, msg: "updated Successfully" });
+//   } catch (error) {
+//     console.log(error);
+//     next(error);
+//   }
+// };
+const profileEdit = async (req, res, next) => {
+  try {
+    const { name, place, experience, mobile } = req.body;
+    console.log("backend profileEdit", name, place, experience, mobile);
+
+    const lawyerId = req.params.id;
+
+    let lawyer = await Lawyer.findByIdAndUpdate(
+      { _id: lawyerId },
+      { $set: { name, place, experience, mobile } },
+      { new: true }
+    );
+
+    if (!lawyer) {
+      return res
+        .status(404)
+        .json({ updated: false, msg: "No such lawyer found" });
+    }
+
+    console.log(lawyer);
+    return res
+      .status(200)
+      .json({ updated: true, data: lawyer, msg: "Updated successfully" });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
+
 
 export default {
   register,
@@ -160,4 +213,5 @@ export default {
   SignupWithGoogle,
   login,
   lawyerData,
+  profileEdit,
 };
