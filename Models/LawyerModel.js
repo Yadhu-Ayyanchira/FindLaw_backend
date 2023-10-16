@@ -21,6 +21,7 @@ const lawyerSchema = new mongoose.Schema({
   },
   about: {
     type: String,
+    default:"About your self"
   },
   place: {
     type: String,

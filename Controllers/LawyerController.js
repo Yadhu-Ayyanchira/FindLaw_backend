@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import sendMail from "../Utils/SendMail.js";
 import crypto from "crypto";
+import uploadToClodinary from "../Utils/Cloudinary.js";
 
 const register = async (req, res, next) => {
   try {
@@ -206,6 +207,55 @@ const profileEdit = async (req, res, next) => {
   }
 };
 
+const aboutEdit = async (req, res, next) => {
+  try {
+    const { about } = req.body;
+    const lawyerId = req.params.id;
+
+    let lawyer = await Lawyer.findByIdAndUpdate(
+      { _id: lawyerId },
+      { $set: { about } },
+      { new: true }
+    );
+
+    if (!lawyer) {
+      return res
+        .status(404)
+        .json({ updated: false, msg: "No such lawyer found" });
+    }
+
+    console.log(lawyer);
+    return res
+      .status(200)
+      .json({ updated: true, data: lawyer, msg: "Updated successfully" });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
+
+const updateImage = async (req,res,next) =>{
+  try {
+    const id = req.body.userId
+    const image = req.file.path
+    console.log("backend img up",image);
+    const uploadDp = await uploadToClodinary(image, "dp")
+    const updated = await Lawyer.findByIdAndUpdate(
+      { _id: id },
+      { $set: { image: uploadDp.url } },
+      { new: true }
+    );
+      if(updated){
+        console.log("updated image");
+        return res.status(200).json({data:updated,message:"Profile picture updated"})
+      }
+      return res.status(202).json({message:"Upload failed"})
+  } catch (error) {
+    console.log(error);
+    next(error)
+  }
+}
+
 
 export default {
   register,
@@ -214,4 +264,6 @@ export default {
   login,
   lawyerData,
   profileEdit,
+  aboutEdit,
+  updateImage,
 };
