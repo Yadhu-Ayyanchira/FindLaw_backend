@@ -27,7 +27,7 @@ const register = async (req, res, next) => {
       let lawyer = await newUser.save().then(console.log("Registered"));
 
       const emailtoken = await new Token({
-        userId: lawyer._id,
+        lawyerId: lawyer._id,
         token: crypto.randomBytes(32).toString("hex"),
       }).save();
       const url = `${process.env.SERVERURL}/lawyer/${lawyer._id}/verify/${emailtoken.token}`;
@@ -54,7 +54,7 @@ const verification = async (req, res) => {
       return res.status(400).json({ message: "invalid link" });
     }
     const token = await Token.findOne({
-      userId: lawyer._id,
+      lawyerId: lawyer._id,
       token: req.params.token,
     });
     if (!token) {
@@ -63,7 +63,7 @@ const verification = async (req, res) => {
     await Lawyer.updateOne({ _id: lawyer._id }, { $set: { verified: true } });
     await Token.deleteOne({ _id: token._id });
 
-    const jwtToken = jwt.sign({ _id: lawyer._id }, process.env.JWTKEY, {
+    const jwtToken = jwt.sign({ lawyerId: lawyer._id }, process.env.JWTKEY_LAWYER, {
       expiresIn: "24hr",
     });
     const redirectUrl = process.env.LAWYERREDIRECTURL;
@@ -93,7 +93,7 @@ const SignupWithGoogle = async (req, res, next) => {
       });
       let user = await newUser.save().then(console.log("saved"));
       await Lawyer.updateOne({ _id: user._id }, { $set: { verified: true } });
-      const token = jwt.sign({ userId: user._id }, process.env.JWTKEY, {
+      const token = jwt.sign({ lawyerId: user._id }, process.env.JWTKEY_LAWYER, {
         expiresIn: "24hr",
       });
       return res.status(200).json({
@@ -131,7 +131,7 @@ const login = async (req, res, next) => {
         .status(201)
         .json({ access: false, message: "Wrong password or username!" });
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWTKEY, {
+    const token = jwt.sign({ lawyerId: user._id }, process.env.JWTKEY_LAWYER, {
       expiresIn: "24hr",
     });
 
