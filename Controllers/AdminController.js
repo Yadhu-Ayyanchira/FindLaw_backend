@@ -25,7 +25,7 @@ const login = async (req, res, next) => {
         .json({ access: false, message: "You are not admin!!!" });
     } else {
       console.log("yesss");
-      const token = jwt.sign({ userId: admin._id }, process.env.JWTKEY, {
+      const token = jwt.sign({ adminId: admin._id }, process.env.JWTKEY_ADMIN, {
         expiresIn: 86400000,
       });
 
@@ -51,7 +51,6 @@ const getUsers = async (req, res, next) => {
 };
 const getLawyers = async (req, res, next) => {
   try {
-    console.log("get lawyers");
     const users = await Lawyer.find({ is_approved:true });
     return res.status(200).json({ data: users });
   } catch (error) {
