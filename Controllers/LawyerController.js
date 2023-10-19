@@ -64,7 +64,7 @@ const verification = async (req, res) => {
     await Token.deleteOne({ _id: token._id });
 
     const jwtToken = jwt.sign({ lawyerId: lawyer._id }, process.env.JWTKEY_LAWYER, {
-      expiresIn: "24hr",
+      // expiresIn: "24hr",
     });
     const redirectUrl = process.env.LAWYERREDIRECTURL;
     res.redirect(redirectUrl);
@@ -94,7 +94,7 @@ const SignupWithGoogle = async (req, res, next) => {
       let user = await newUser.save().then(console.log("saved"));
       await Lawyer.updateOne({ _id: user._id }, { $set: { verified: true } });
       const token = jwt.sign({ lawyerId: user._id }, process.env.JWTKEY_LAWYER, {
-        expiresIn: "24hr",
+        // expiresIn: "24hr",
       });
       return res.status(200).json({
         created: true,
@@ -132,7 +132,7 @@ const login = async (req, res, next) => {
         .json({ access: false, message: "Wrong password or username!" });
 
     const token = jwt.sign({ lawyerId: user._id }, process.env.JWTKEY_LAWYER, {
-      expiresIn: "24hr",
+      // expiresIn: "24hr",
     });
 
     // const { pass, ...info } = user._doc;
