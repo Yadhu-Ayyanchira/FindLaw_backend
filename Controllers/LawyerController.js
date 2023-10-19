@@ -122,7 +122,6 @@ const login = async (req, res, next) => {
         .status(201)
         .json({ access: false, message: "User not verified" });
     if (user.is_blocked) {
-      console.log("bloked");
       return res.status(201).json({ access: false, message: "User Blocked" });
     }
     const isCorrect = bcrypt.compareSync(password, user.password);

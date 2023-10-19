@@ -12,14 +12,13 @@ export const lawyerAuth = async (req, res, next) => {
           const decoded = jwt.verify(token, process.env.JWTKEY_LAWYER);
           const lawyer = await Lawyer.findOne({ _id: decoded.lawyerId });
           if (lawyer) {
-            console.log("lawww",lawyer);
             if (lawyer.is_blocked == false) {
               req.headers.lawyerId = decoded.lawyerId;
               next();
             } else {
               return res
-                .status(403)
-                .json({ data: { message: "You are blocked by admin " } });
+                .status(201)
+                .json({ status: false, message: "User Blocked" });
             }
           } else {
             return res
