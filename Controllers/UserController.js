@@ -61,7 +61,7 @@ const verification = async (req, res) => {
     await User.updateOne({ _id: user._id }, { $set: { verified: true } });
     await Token.deleteOne({ _id: token._id });
 
-    const jwtToken = jwt.sign({ _id: user._id }, process.env.JWTKEY, {
+    const jwtToken = jwt.sign({ _id: user._id }, process.env.JWTKEY_USER, {
       expiresIn: "24hr",
     });
     const redirectUrl = process.env.REDIRECTURL;
@@ -95,7 +95,7 @@ const login = async (req, res, next) => {
         .status(201)
         .json({ access: false, message: "Wrong password or username!" });
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWTKEY, {
+    const token = jwt.sign({ userId: user._id }, process.env.JWTKEY_USER, {
       expiresIn: "24hr",
     });
     // const { pass, ...info } = user._doc;
@@ -129,7 +129,7 @@ const SignupWithGoogle = async (req, res, next) => {
       });
       let user = await newUser.save().then(console.log("saved"));
       await User.updateOne({ _id: user._id }, { $set: { verified: true } });
-      const token = jwt.sign({ userId: user._id }, process.env.JWTKEY, {
+      const token = jwt.sign({ userId: user._id }, process.env.JWTKEY_USER, {
         expiresIn: "24hr",
       });
       return res.status(200).json({

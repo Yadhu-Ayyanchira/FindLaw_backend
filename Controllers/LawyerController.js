@@ -41,7 +41,7 @@ const register = async (req, res, next) => {
       });
     }
   } catch (error) {
-    onsole.log(error);
+    console.log(error);
     return res.status(500).json({ message: "internal server error" });
   }
 };
@@ -161,26 +161,10 @@ const lawyerData = async (req, res, next) => {
   }
 };
 
-// const profileEdit = async (req, res, next) => {
-//   try {
-//     const { name, place, experience, mobile } = req.body;
-//     console.log("backend profileEdit", name, place, experience, mobile);
-//     const lawyerId = req.params.id;
-//     let lawyer = await Lawyer.findByIdAndUpdate({_id:lawyerId}, {
-//       $set: { name, place, experience, mobile },
-//     });
-//     if (!lawyer) return res.send("no such lawyer");
-//     console.log(lawyer);
-//     return res.status(200).json({updated:true,data:lawyer, msg: "updated Successfully" });
-//   } catch (error) {
-//     console.log(error);
-//     next(error);
-//   }
-// };
+
 const profileEdit = async (req, res, next) => {
   try {
     const { name, place, experience, mobile } = req.body;
-    console.log("backend profileEdit", name, place, experience, mobile);
 
     const lawyerId = req.params.id;
 
@@ -196,7 +180,6 @@ const profileEdit = async (req, res, next) => {
         .json({ updated: false, msg: "No such lawyer found" });
     }
 
-    console.log(lawyer);
     return res
       .status(200)
       .json({ updated: true, data: lawyer, msg: "Updated successfully" });

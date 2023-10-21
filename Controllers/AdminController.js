@@ -24,7 +24,7 @@ const login = async (req, res, next) => {
         .status(201)
         .json({ access: false, message: "You are not admin!!!" });
     } else {
-      console.log("yesss");
+      console.log("yesss",process.env.JWTKEY_ADMIN);
       const token = jwt.sign({ adminId: admin._id }, process.env.JWTKEY_ADMIN, {
         expiresIn: 86400000,
       });
@@ -41,8 +41,10 @@ const login = async (req, res, next) => {
 
 const getUsers = async (req, res, next) => {
   try {
-    console.log("get users");
-    const users = await User.find({ is_admin: false });
+    const{ active } = req.params
+    const start = (active-1)*5
+    const end=start+5
+    const users = await User.find({ is_admin: false }).skip(start).limit(end)
     return res.status(200).json({ data: users });
   } catch (error) {
     console.log(error);
@@ -51,7 +53,11 @@ const getUsers = async (req, res, next) => {
 };
 const getLawyers = async (req, res, next) => {
   try {
-    const users = await Lawyer.find({ is_approved:true });
+    const { active } = req.params;
+    console.log("page is",active);
+    const start = (active - 1) * 5;
+    const end = start + 5;
+    const users = await Lawyer.find({ is_approved:true }).skip(start).limit(end)
     return res.status(200).json({ data: users });
   } catch (error) {
     console.log(error);
@@ -75,12 +81,18 @@ const manageLawyers = async (req, res, next) => {
     }
   } catch (error) {
     console.log(error.message);
+    next(error)
   }
 };
 
 const getLawyerRequests = async (req, res, next) => {
   try {
-    const users = await Lawyer.find({ is_approved: false });
+     const { active } = req.params;
+         console.log("page is req", active);
+
+     const start = (active - 1) * 5;
+     const end = start + 5;
+    const users = await Lawyer.find({ is_approved: false }).skip(start).limit(end)
     return res.status(200).json({ data: users });
   } catch (error) {
     console.log(error);
