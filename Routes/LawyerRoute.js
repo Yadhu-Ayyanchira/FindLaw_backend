@@ -11,5 +11,4 @@ LawyerRoute.post('/login',LawyerController.login)
 LawyerRoute.get("/lawyerData/:id",lawyerAuth , LawyerController.lawyerData);
 LawyerRoute.post("/profileEdit/:id",lawyerAuth, LawyerController.profileEdit);
 LawyerRoute.put("/aboutEdit/:id",lawyerAuth, LawyerController.aboutEdit);
-LawyerRoute.post("/imgupdate",lawyerAuth,upload.single("image"), LawyerController.updateImage)
 export default LawyerRoute;

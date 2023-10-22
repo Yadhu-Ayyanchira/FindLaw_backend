@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import sendMail from "../Utils/SendMail.js";
 import crypto from "crypto";
+import uploadToClodinary from "../Utils/Cloudinary.js";
 
 const signup = async (req, res, next) => {
   try {
@@ -144,9 +145,55 @@ const SignupWithGoogle = async (req, res, next) => {
   }
 };
 
+const userData = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    console.log("id is",id);
+    const user = await User.findById(id);
+    if (user) {
+      return res.status(200).json({ data: user });
+    }
+  } catch (error) {
+    next(error);
+    console.log(error);
+  }
+};
+
+const profileEdit = async (req, res, next) => {
+  try {
+    const { name, place, mobile } = req.body;
+
+    const userId = req.params.id;
+    console.log("user id",userId);
+
+    let user = await User.findByIdAndUpdate(
+      { _id: userId },
+      { $set: { name, place, mobile } },
+      { new: true }
+    );
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ updated: false, msg: "No such user found" });
+    }
+
+    return res
+      .status(200)
+      .json({ updated: true, data: user, msg: "Updated successfully" });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
+
+
+
 export default {
   login,
   signup,
   SignupWithGoogle,
   verification,
+  userData,
+  profileEdit,
 };

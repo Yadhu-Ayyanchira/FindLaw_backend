@@ -12,6 +12,10 @@ const userSchema = new mongoose.Schema({
   mobile: {
     type: String,
   },
+  place: {
+    type: String,
+    default: "California"
+  },
   password: {
     type: String,
     required: true,
