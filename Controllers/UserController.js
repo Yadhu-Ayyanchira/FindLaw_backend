@@ -148,7 +148,6 @@ const SignupWithGoogle = async (req, res, next) => {
 const userData = async (req, res, next) => {
   try {
     const id = req.params.id;
-    console.log("id is",id);
     const user = await User.findById(id);
     if (user) {
       return res.status(200).json({ data: user });
@@ -187,7 +186,30 @@ const profileEdit = async (req, res, next) => {
   }
 };
 
-
+const updateImage = async (req, res, next) => {
+  console.log("inn img");
+  try {
+    const id = req.body.userId;
+    const image = req.file.path;
+    console.log("backend img up", image);
+    const uploadDp = await uploadToClodinary(image, "dp");
+    const updated = await User.findByIdAndUpdate(
+      { _id: id },
+      { $set: { image: uploadDp.url } },
+      { new: true }
+    );
+    if (updated) {
+      console.log("updated image");
+      return res
+        .status(200)
+        .json({ data: updated, message: "Profile picture updated" });
+    }
+    return res.status(202).json({ message: "Upload failed" });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
 
 export default {
   login,
@@ -196,4 +218,5 @@ export default {
   verification,
   userData,
   profileEdit,
+  updateImage
 };
