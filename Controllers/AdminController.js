@@ -25,7 +25,7 @@ const login = async (req, res, next) => {
         .json({ access: false, message: "You are not admin!!!" });
     } else {
       console.log("yesss",process.env.JWTKEY_ADMIN);
-      const token = jwt.sign({ adminId: admin._id }, process.env.JWTKEY_ADMIN, {
+      const token = jwt.sign({ adminId: admin._id, role:"admin" }, process.env.JWTKEY_ADMIN, {
         expiresIn: 86400000,
       });
 

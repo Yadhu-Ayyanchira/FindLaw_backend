@@ -48,16 +48,23 @@ export const adminAuth = async (req,res,next) => {
     if(req.headers.authorization){
       let token = req.headers.authorization.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWTKEY_ADMIN);
-      const admin = await User.findOne({_id:decoded.adminId})
-      if(admin){
-        if(admin.is_admin){
-          req.headers.adminId=decoded.adminId
-          next()
-        }else{
-          return res.status(403).json({message:"Unauthorized access!"});
+      const userRole = decoded.role;
+      if (userRole == "lawyer") {
+        const admin = await User.findOne({ _id: decoded.adminId });
+        if (admin) {
+          if (admin.is_admin) {
+            req.headers.adminId = decoded.adminId;
+            next();
+          } else {
+            return res.status(403).json({ message: "Unauthorized access!" });
+          }
+        } else {
+          return res
+            .status(400)
+            .json({ message: "user not authorized or invalid user" });
         }
-      }else{
-        return res.status(400).json({message:"user not authorized or invalid user"});
+      } else {
+        return res.status(400).json({ message: "admin not authorised" });
       }
     }else{
       return res.status(400).json({message:"admin not authenticated"});
