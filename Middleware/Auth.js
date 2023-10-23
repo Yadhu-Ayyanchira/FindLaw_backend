@@ -73,3 +73,33 @@ export const adminAuth = async (req, res, next) => {
     next(error);
   }
 };
+
+export const userAuth = async (req,res,next) => {
+  try {
+    if(req.headers.authorization){
+      let token = req.headers.authorization
+      const decoded = jwt.verify(token,process.env.JWTKEY_USER);
+      const userRole = decoded.role;
+      if(userRole==="user"){
+        const user = await User.findById(decoded._id);
+        if(user){
+          if(user.is_blocked == false){
+            req.headers.userId=decoded._id;
+            next()
+          }else{
+            return res.status(400).send('Your account has been blocked');
+          }
+        }else{
+          return res.status(400).json({message:"Invalid user"})
+        }
+      }else{
+        return res.status(400).json({message:"Invalid role"})
+      }
+    }else{
+      return res.status(400).json({message:"Not Authenticated"})
+    }
+  } catch (error) {
+    console.log(error);
+    next(error)
+  }
+}
