@@ -43,34 +43,33 @@ export const lawyerAuth = async (req, res, next) => {
     }
 }
 
-export const adminAuth = async (req,res,next) => {
+
+export const adminAuth = async (req, res, next) => {
   try {
-    if(req.headers.authorization){
+    if (req.headers.authorization) {
       let token = req.headers.authorization.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWTKEY_ADMIN);
       const userRole = decoded.role;
-      if (userRole == "lawyer") {
+      if (userRole === "admin") {
         const admin = await User.findOne({ _id: decoded.adminId });
         if (admin) {
           if (admin.is_admin) {
             req.headers.adminId = decoded.adminId;
             next();
           } else {
-            return res.status(403).json({ message: "Unauthorized access!" });
+            return res.status(400).json({ message: "Unauthorized access!" });
           }
         } else {
-          return res
-            .status(400)
-            .json({ message: "user not authorized or invalid user" });
+          return res.status(400).json({ message: "User not authorized or invalid user" });
         }
       } else {
-        return res.status(400).json({ message: "admin not authorised" });
+        return res.status(400).json({ message: "Admin not authorized" });
       }
-    }else{
-      return res.status(400).json({message:"admin not authenticated"});
+    } else {
+      return res.status(400).json({ message: "Admin not authenticated" });
     }
   } catch (error) {
     console.log(error);
-    next(error)
+    next(error);
   }
-}
+};
