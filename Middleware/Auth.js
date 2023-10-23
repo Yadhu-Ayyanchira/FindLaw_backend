@@ -47,7 +47,7 @@ export const lawyerAuth = async (req, res, next) => {
 export const adminAuth = async (req, res, next) => {
   try {
     if (req.headers.authorization) {
-      let token = req.headers.authorization.split(" ")[1];
+      let token = req.headers.authorization
       const decoded = jwt.verify(token, process.env.JWTKEY_ADMIN);
       const userRole = decoded.role;
       if (userRole === "admin") {
