@@ -1,4 +1,5 @@
 import User from "../Models/UserModel.js";
+import Lawyer from "../Models/LawyerModel.js"
 import Token from "../Models/TokenModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -210,6 +211,25 @@ const updateImage = async (req, res, next) => {
     next(error);
   }
 };
+const lawyerData = async (req,res,next) => {
+  try {
+    const {page,filter,search} = req.query
+    console.log("page searchedd",page,filter,search);
+    let query = { is_approved:true };
+
+    if (search) {
+      query.$or = [
+        { name: { $regex: new RegExp(search, "i") } },
+        { place: { $regex: new RegExp(search, "i") } },
+      ];
+    }
+    const lawyers = await Lawyer.find(query);
+    return res.status(200).json({ data: lawyers});
+  } catch (error) {
+    console.log(error);
+    next(error)
+  }
+}
 
 export default {
   login,
@@ -218,5 +238,6 @@ export default {
   verification,
   userData,
   profileEdit,
-  updateImage
+  updateImage,
+  lawyerData
 };

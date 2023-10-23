@@ -11,6 +11,7 @@ UserRouter.get("/:id/verify/:token", UserController.verification);
 UserRouter.get("/userData/:id", UserController.userData);
 UserRouter.post("/profileEdit/:id",UserController.profileEdit);
 UserRouter.post("/imgupdate",upload.single("image"), UserController.updateImage)
+UserRouter.get("/lawyerData", UserController.lawyerData);
 
 
 
