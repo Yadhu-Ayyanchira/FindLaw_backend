@@ -8,14 +8,10 @@ export const lawyerAuth = async (req, res, next) => {
   try {
     if (req.headers.authorization) {
       const token = req.headers.authorization;
-      console.log('token is', token);
       const decoded = jwt.verify(token, process.env.JWTKEY_LAWYER);
-      console.log('decoded is', decoded);
       const userRole = decoded.role;
-      console.log('role is', userRole);
       if (userRole == 'lawyer') {
         const lawyer = await Lawyer.findOne({_id: decoded.lawyerId});
-
         if (lawyer) {
           if (lawyer.is_blocked == false) {
             req.headers.lawyerId = decoded.lawyerId;

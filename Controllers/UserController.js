@@ -111,6 +111,7 @@ const login = async (req, res, next) => {
       token,
       info: user,
       message: 'Logged in successfully',
+      
     });
   } catch (err) {
     next(err);
