@@ -22,7 +22,7 @@ module.exports = {
   rules: {
     "max-len": ["error", { code: 150 }],
     //"linebreak-style": ["error", "unix"],
-    "linebreak-style": "off",
+    // "linebreak-style": "off",
     quotes: ["error", "double", "single"],
   },
 };
