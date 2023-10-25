@@ -235,6 +235,17 @@ const lawyerData = async (req, res, next) => {
   }
 };
 
+const lawyerView = async (req,res,next) =>{
+  try {
+    const {id} = req.query 
+    const lawyer = await Lawyer.findById(id)
+    return res.status(200).json({ data: lawyer });
+  } catch (error) {
+    console.log(error);
+    next(error)
+  }
+}
+
 export default {
   login,
   signup,
@@ -244,4 +255,5 @@ export default {
   profileEdit,
   updateImage,
   lawyerData,
+  lawyerView,
 };

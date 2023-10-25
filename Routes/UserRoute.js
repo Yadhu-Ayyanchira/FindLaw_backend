@@ -11,9 +11,9 @@ UserRouter.post('/googleSignup', UserController.SignupWithGoogle);
 UserRouter.get('/:id/verify/:token', UserController.verification);
 UserRouter.get('/userData/:id', UserController.userData);
 UserRouter.post('/profileEdit/:id', UserController.profileEdit);
-// eslint-disable-next-line max-len
 UserRouter.post('/imgupdate', upload.single('image'), UserController.updateImage);
 UserRouter.get('/lawyerData', UserController.lawyerData);
+UserRouter.get('/lawyerView', UserController.lawyerView);
 
 
 export default UserRouter;
