@@ -14,4 +14,6 @@ LawyerRoute.post("/profileEdit/:id",lawyerAuth, LawyerController.profileEdit);
 LawyerRoute.put("/aboutEdit/:id",lawyerAuth, LawyerController.aboutEdit);
 LawyerRoute.post("/imgupdate",lawyerAuth,upload.single("image"), LawyerController.updateImage)
 LawyerRoute.post("/addSlot",lawyerAuth,SlotController.addSlot);
+LawyerRoute.get("/slotDate",lawyerAuth,SlotController.getSlotDate)
+LawyerRoute.get("/slots",lawyerAuth,SlotController.getSlots);
 export default LawyerRoute;
