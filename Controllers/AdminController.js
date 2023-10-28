@@ -44,11 +44,19 @@ const login = async (req, res, next) => {
 
 const getUsers = async (req, res, next) => {
   try {
-    const {active} = req.params;
-    const start = (active-1)*5;
-    const end=start+5;
-    const users = await User.find({is_admin: false}).skip(start).limit(end);
-    return res.status(200).json({data: users});
+    const { page, filter, search } = req.query;
+    console.log("page detail", page, filter, search);
+    let query = { is_admin: false };
+    if (search) {
+      query.$or = [
+        { name: { $regex: new RegExp(search, "i") } },
+      ];
+    }
+    const perPage = 5;
+    const skip = (page - 1) * perPage;
+    const count = await User.find(query).countDocuments();
+    const users = await User.find(query).skip(skip).limit(perPage);
+    return res.status(200).json({data: users,count,pageSize:perPage,page});
   } catch (error) {
     console.log(error);
     next(error);
