@@ -218,7 +218,6 @@ const updateImage = async (req, res, next) => {
 const lawyerData = async (req, res, next) => {
   try {
     const { page, filter, search } = req.query;
-    console.log("page searchedd", page, filter, search);
     const query = { is_approved: true };
 
     if (search) {
@@ -227,24 +226,27 @@ const lawyerData = async (req, res, next) => {
         { place: { $regex: new RegExp(search, "i") } },
       ];
     }
-    const lawyers = await Lawyer.find(query);
-    return res.status(200).json({ data: lawyers });
+    const perPage = 4;
+    const skip = (page - 1) * perPage;
+    const count = await Lawyer.find(query).countDocuments();
+    const lawyers = await Lawyer.find(query).skip(skip).limit(perPage);
+    return res.status(200).json({ data: lawyers,count,pageSize:perPage,page });
   } catch (error) {
     console.log(error);
     next(error);
   }
 };
 
-const lawyerView = async (req,res,next) =>{
+const lawyerView = async (req, res, next) => {
   try {
-    const {id} = req.query 
-    const lawyer = await Lawyer.findById(id)
+    const { id } = req.query;
+    const lawyer = await Lawyer.findById(id);
     return res.status(200).json({ data: lawyer });
   } catch (error) {
     console.log(error);
-    next(error)
+    next(error);
   }
-}
+};
 
 export default {
   login,
