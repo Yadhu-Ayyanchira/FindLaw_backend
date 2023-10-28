@@ -179,6 +179,12 @@ const getSlotDateUser = async (req, res, next) => {
     const { lawyerId } = req.query;
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate());
+    tomorrow.setHours(0);
+    tomorrow.setMinutes(0);
+    tomorrow.setSeconds(0);
+    tomorrow.setMilliseconds(0);
+    const formattedDate = tomorrow.toISOString().replace("Z", "+00:00");
+    console.log("tomorrow is",tomorrow);
     const result = await Slot.aggregate([
       {
         $match: {
@@ -205,9 +211,8 @@ const getSlotDateUser = async (req, res, next) => {
       const slotDates = slotArray.flat();
 
       return res.status(200).json({ data: slotDates, message: "success" });
-    }else{
-            return res.status(200).json({cmessage: "No slots" });
-
+    } else {
+      return res.status(200).json({ cmessage: "No slots" });
     }
   } catch (error) {
     console.log(error);
@@ -251,23 +256,23 @@ const getSlotDateUser = async (req, res, next) => {
 //      }
 //   } catch (error) {
 //     console.log(error);
-//     next(error)    
+//     next(error)
 //   }
 // }
 const getSlotsUser = async (req, res, next) => {
   try {
-    console.log("jhjjhj");
     const { date, lawyerId } = req.query;
+    console.log("jhjjhj", date);
     if (!date) {
       console.log("no date");
       return res.status(400).json({ message: "Please select a Date" });
     }
 
-    const validDate = moment(date, "YYYY-MM-DD").toDate();
-    // if (!validDate.isValid()) {
-    //   console.log("not vaid");
-    //   return res.status(400).json({ message: "Invalid Date format" });
-    // }
+    const validDate = moment(date, "YYYY-MM-DD")
+      .startOf("day")
+      .format("YYYY-MM-DDTHH:mm:00.000[Z]");
+
+    console.log(validDate, "valid date");
 
     const availableSlots = await Slot.find({
       lawyer: lawyerId,
@@ -276,7 +281,7 @@ const getSlotsUser = async (req, res, next) => {
     }).exec();
 
     if (availableSlots) {
-      console.log("slot avail");
+      console.log("slot avail", availableSlots);
       const mergedObject = availableSlots.reduce((result, slot) => {
         slot.slotes.forEach((slotInfo) => {
           if (slotInfo.slotDate) {
@@ -301,7 +306,6 @@ const getSlotsUser = async (req, res, next) => {
     next(error);
   }
 };
-
 
 export default {
   addSlot,
