@@ -101,7 +101,7 @@ const login = async (req, res, next) => {
         .json({ access: false, message: "Wrong password or username!" });
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWTKEY_USER, {
+    const token = jwt.sign({ userId: user._id, role: "user" }, process.env.JWTKEY_USER, {
       expiresIn: "24hr",
     });
     // const { pass, ...info } = user._doc;

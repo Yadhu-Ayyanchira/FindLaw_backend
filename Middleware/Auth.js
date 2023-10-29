@@ -24,7 +24,7 @@ export const lawyerAuth = async (req, res, next) => {
         } else {
           return res
             .status(400)
-            .json({ message: "user not authorised or inavid user" });
+            .json({ message: "user not authorised or invalid user" });
         }
       } else {
         return res.status(400).json({ message: "user not authorised" });
@@ -73,17 +73,22 @@ export const adminAuth = async (req, res, next) => {
 export const userAuth = async (req, res, next) => {
   try {
     if (req.headers.authorization) {
+      console.log("have header");
       const token = req.headers.authorization;
       const decoded = jwt.verify(token, process.env.JWTKEY_USER);
       const userRole = decoded.role;
       if (userRole === "user") {
-        const user = await User.findById(decoded._id);
+        console.log("roll ok",decoded);
+        const user = await User.findById(decoded.userId);
         if (user) {
+          console.log("have user");
           if (user.is_blocked == false) {
+            console.log("not blked user");
             req.headers.userId = decoded._id;
             next();
           } else {
-            return res.status(400).send("Your account has been blocked");
+            console.log("user blked");
+            return res.status(400).send("User Blocked");
           }
         } else {
           return res.status(400).json({ message: "Invalid user" });
@@ -92,6 +97,7 @@ export const userAuth = async (req, res, next) => {
         return res.status(400).json({ message: "Invalid role" });
       }
     } else {
+      console.log("no headder");
       return res.status(400).json({ message: "Not Authenticated" });
     }
   } catch (error) {
