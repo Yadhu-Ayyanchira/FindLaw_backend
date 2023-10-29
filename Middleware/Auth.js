@@ -73,21 +73,16 @@ export const adminAuth = async (req, res, next) => {
 export const userAuth = async (req, res, next) => {
   try {
     if (req.headers.authorization) {
-      console.log("have header");
       const token = req.headers.authorization;
       const decoded = jwt.verify(token, process.env.JWTKEY_USER);
       const userRole = decoded.role;
       if (userRole === "user") {
-        console.log("roll ok",decoded);
         const user = await User.findById(decoded.userId);
         if (user) {
-          console.log("have user");
           if (user.is_blocked == false) {
-            console.log("not blked user");
             req.headers.userId = decoded._id;
             next();
           } else {
-            console.log("user blked");
             return res.status(400).send("User Blocked");
           }
         } else {
@@ -97,7 +92,6 @@ export const userAuth = async (req, res, next) => {
         return res.status(400).json({ message: "Invalid role" });
       }
     } else {
-      console.log("no headder");
       return res.status(400).json({ message: "Not Authenticated" });
     }
   } catch (error) {

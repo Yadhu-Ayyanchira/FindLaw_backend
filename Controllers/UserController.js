@@ -5,6 +5,7 @@ import Token from "../Models/TokenModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import sendMail from "../Utils/SendMail.js";
+import sendOtp from "../Utils/SendOtp.js"
 import crypto from "crypto";
 import uploadToClodinary from "../Utils/Cloudinary.js";
 
@@ -34,7 +35,7 @@ const signup = async (req, res, next) => {
       }).save();
       const url = `${process.env.SERVERURL}/${user._id}/verify/${emailtoken.token}`;
       await sendMail(user.email, "Verify Email", url);
-      console.log("email Succes");
+      console.log("email Succes", emailtoken);
       return res.status(200).json({
         token: emailtoken,
         user: user,
@@ -101,9 +102,13 @@ const login = async (req, res, next) => {
         .json({ access: false, message: "Wrong password or username!" });
     }
 
-    const token = jwt.sign({ userId: user._id, role: "user" }, process.env.JWTKEY_USER, {
-      expiresIn: "24hr",
-    });
+    const token = jwt.sign(
+      { userId: user._id, role: "user" },
+      process.env.JWTKEY_USER,
+      {
+        expiresIn: "24hr",
+      }
+    );
     // const { pass, ...info } = user._doc;
 
     return res.status(200).json({
@@ -230,7 +235,9 @@ const lawyerData = async (req, res, next) => {
     const skip = (page - 1) * perPage;
     const count = await Lawyer.find(query).countDocuments();
     const lawyers = await Lawyer.find(query).skip(skip).limit(perPage);
-    return res.status(200).json({ data: lawyers,count,pageSize:perPage,page });
+    return res
+      .status(200)
+      .json({ data: lawyers, count, pageSize: perPage, page });
   } catch (error) {
     console.log(error);
     next(error);
@@ -248,6 +255,55 @@ const lawyerView = async (req, res, next) => {
   }
 };
 
+const forgotpassword = async (req, res, next) => {
+  try {
+    console.log("forgot pass");
+    const { email } = req.query;
+    //create random 4 digit
+    const user = await User.findOne({ email: email });
+    if(user){
+      let code = Math.floor(Math.random() * 9000 + 1000);
+      console.log("otp=",code);
+      const message = `Your otp for password change  is ${code}`
+      const token = new Token({
+        userId: user._id,
+        token: code,
+      })
+    await sendOtp(email,"Change password",message)
+    await token.save()
+    await user.save()
+    return res.status(200).json({status:true,message:"OTP send successfully"})
+    }else{
+      console.log("no user");
+      return res.status(403).json({ status: false, message: 'Invalid Email' })
+    }
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+const changepassword = async (req, res, next) => {
+  try {
+    console.log("forgot pass");
+    const {email, password, otp } = req.body;
+    const user= await User.findOne({ email: email })
+    const token = await Token.findOne({userId: user._id})
+    if(token && token.token==otp){
+      const hash = await bcrypt.hash(password, 10);
+      user.password = hash;
+      await user.save();
+      await Token.findOneAndDelete({userId: user._id});
+      return res.status(200).json({status: true, message: "Password changed Successfully"})
+    }else{
+      return res.status(403).json({ status: false, message: 'Wrong OTP' })
+    }
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
 export default {
   login,
   signup,
@@ -258,4 +314,6 @@ export default {
   updateImage,
   lawyerData,
   lawyerView,
+  changepassword,
+  forgotpassword,
 };

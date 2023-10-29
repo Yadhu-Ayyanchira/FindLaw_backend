@@ -19,6 +19,8 @@ UserRouter.get('/lawyerData', UserController.lawyerData);
 UserRouter.get('/lawyerView', UserController.lawyerView);
 UserRouter.get("/slotdate",userAuth, SlotController.getSlotDateUser);
 UserRouter.get("/slotsuser",userAuth, SlotController.getSlotsUser);
+UserRouter.get("/forgotpassword", UserController.forgotpassword);
+UserRouter.post("/changepassword", UserController.changepassword);
 
 
 export default UserRouter;
