@@ -80,7 +80,7 @@ export const userAuth = async (req, res, next) => {
         const user = await User.findById(decoded.userId);
         if (user) {
           if (user.is_blocked == false) {
-            req.headers.userId = decoded._id;
+            req.headers.userId = decoded.userId;
             next();
           } else {
             return res.status(400).send("User Blocked");

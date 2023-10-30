@@ -43,3 +43,4 @@ const appointmentschema = new Schema(
 );
 
 const Appoinment = mongoose.model("Appointment", appointmentschema);
+export default Appoinment;

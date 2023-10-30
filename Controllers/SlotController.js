@@ -1,7 +1,9 @@
 import Slot from "../Models/SlotModel.js";
 import Lawyer from "../Models/LawyerModel.js";
+import Appointment from "../Models/AppointmentModel.js"
 import moment from "moment";
 import mongoose from "mongoose";
+import User from "../Models/UserModel.js";
 
 const addSlot = async (req, res, next) => {
   try {
@@ -40,10 +42,8 @@ const addSlot = async (req, res, next) => {
         },
       });
       if (findSlotExist) {
-        console.log("existt");
         return res.status(409).json({ message: "Slot already exists" });
       }
-      console.log("date error", startTime, endTime, slotDuration, date);
       const createSlots = generateTimeSlots(
         startTime,
         endTime,
@@ -65,13 +65,11 @@ const addSlot = async (req, res, next) => {
       return res.status(200).json({ savedSlots });
     }
   } catch (error) {
-    console.log("hghhjghjgjhgjgh");
     console.log(error);
     next(error);
   }
 };
 function generateTimeSlots(startTime, endTime, slotDuration, date) {
-  console.log("date is", startTime, endTime, slotDuration, date);
   const slots = [];
   const end = new Date(`${date} ${endTime}`);
   const start = new Date(` ${date} ${startTime} `);
@@ -97,7 +95,6 @@ function generateTimeSlots(startTime, endTime, slotDuration, date) {
 
 const getSlotDate = async (req, res, next) => {
   try {
-    console.log("getSlotDate");
     const lawyerId = req.headers.lawyerId;
     const result = await Slot.aggregate([
       { $match: { lawyer: new mongoose.Types.ObjectId(lawyerId) } },
@@ -132,17 +129,13 @@ const getSlotDate = async (req, res, next) => {
 
 const getSlots = async (req, res, next) => {
   try {
-    console.log("getslots");
     const { date } = req.query;
-    console.log("date is", date);
     if (!date) {
-      console.log("okkkk");
       return res.status(200).json({ message: "please select Date" });
     }
 
     const lawyerId = req.headers.lawyerId;
     const yesterday = moment().subtract(1, "days").format("YYYY-MM-DD");
-    console.log(yesterday, "yesterday");
     await Slot.updateMany(
       {
         lawyer: lawyerId,
@@ -162,10 +155,8 @@ const getSlots = async (req, res, next) => {
       "slotes.slotDate": { $eq: new Date(date) },
     }).exec();
     if (availableSlots) {
-      console.log("slot avail");
       return res.status(200).json({ data: availableSlots, message: "success" });
     } else {
-      console.log("not avail");
       return res.status(200).json({ message: "slote not avilble" });
     }
   } catch (error) {
@@ -184,7 +175,6 @@ const getSlotDateUser = async (req, res, next) => {
     tomorrow.setSeconds(0);
     tomorrow.setMilliseconds(0);
     const formattedDate = tomorrow.toISOString().replace("Z", "+00:00");
-    console.log("tomorrow is",tomorrow);
     const result = await Slot.aggregate([
       {
         $match: {
@@ -220,59 +210,17 @@ const getSlotDateUser = async (req, res, next) => {
   }
 };
 
-// const getSlotsUser = async (req,res,next)=>{
-//   try {
-//     const { date, lawyerId } = req.query;
-//     const validDate = moment(date, "YYYY-MM-DD", true);
-//     console.log("getSlotsUser",date);
-//      if (!date) {
-//       console.log("no date gfgf");
-//        return res.status(400).json({ message: "please select Date" });
-//      }
-//      const availableSlots = await Slot.find({
-//        lawyer: lawyerId,
-//        "slotes.slotDate": validDate.toDate(), // Convert date to JavaScript Date object
-//        "slotes.isBooked": false,
-//      }).exec();
-//      if (availableSlots) {
-//        // console.log(availableSlots);
-//        const mergedObject = availableSlots.reduce((result, slot) => {
-//          slot.slotes.forEach((slotInfo) => {
-//            if (slotInfo.slotDate) {
-//              if (!result[slotInfo.slotDate]) {
-//                result[slotInfo.slotDate] = [];
-//              }
-//              result[slotInfo.slotDate].push(slotInfo);
-//            }
-//          });
-//          return result;
-//        }, {});
-//        const mergedArray = [].concat(...Object.values(mergedObject));
 
-//        console.log(mergedArray);
-//        return res.status(200).json({ data: mergedArray, message: "success" });
-//      } else {
-//        return res.status(200).json({ message: "slote not avilble" });
-//      }
-//   } catch (error) {
-//     console.log(error);
-//     next(error)
-//   }
-// }
 const getSlotsUser = async (req, res, next) => {
   try {
     const { date, lawyerId } = req.query;
-    console.log("jhjjhj", date);
     if (!date) {
-      console.log("no date");
       return res.status(400).json({ message: "Please select a Date" });
     }
 
     const validDate = moment(date, "YYYY-MM-DD")
       .startOf("day")
       .format("YYYY-MM-DDTHH:mm:00.000[Z]");
-
-    console.log(validDate, "valid date");
 
     const availableSlots = await Slot.find({
       lawyer: lawyerId,
@@ -281,7 +229,6 @@ const getSlotsUser = async (req, res, next) => {
     }).exec();
 
     if (availableSlots) {
-      console.log("slot avail", availableSlots);
       const mergedObject = availableSlots.reduce((result, slot) => {
         slot.slotes.forEach((slotInfo) => {
           if (slotInfo.slotDate) {
@@ -295,7 +242,6 @@ const getSlotsUser = async (req, res, next) => {
       }, {});
       const mergedArray = [].concat(...Object.values(mergedObject));
 
-      console.log(mergedArray);
       return res.status(200).json({ data: mergedArray, message: "success" });
     } else {
       console.log("no slot");
@@ -307,10 +253,64 @@ const getSlotsUser = async (req, res, next) => {
   }
 };
 
+const addAppointment = async (req,res,next) => {
+  try {
+    const {slId,lawyerId,slTime,slDate} = req.body.data
+    const userId = req.headers.userId
+
+    const lawyer = await Lawyer.findById(lawyerId)
+    const userdata = await User.findById(userId);
+    if (userdata.flc < 300) {
+      return res.status(403).json({ created: false, message: "No FLC" });
+    }
+    
+    const updatedSlot = await Slot.findOneAndUpdate(
+      {
+        lawyer: lawyerId,
+        slotes: {
+          $elemMatch: { _id: slId },
+        },
+      },
+      { $set: { "slotes.$.isBooked": true } }
+    );
+
+    const Appoinment = new Appointment({
+      lawyer: lawyerId,
+      user: userId,
+      scheduledAt: {
+        slotTime: slTime,
+        slotDate: slDate,
+      },
+    });
+      if (Appoinment) {
+        console.log("have appo");
+        await Appoinment.save();
+       const user = await User.findOneAndUpdate(
+          { _id: userId },
+          { $inc: { flc: -300 } },
+          { new: true }
+        );
+           
+
+        return res
+          .status(200)
+          .json({ created: true,data:user, message: "Appoinment added successfully" });
+      }
+
+  } catch (error) {
+    console.log(error);
+    next(error)
+  }
+}
+
+
+
+
 export default {
   addSlot,
   getSlotDate,
   getSlots,
   getSlotDateUser,
   getSlotsUser,
+  addAppointment,
 };
