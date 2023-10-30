@@ -28,7 +28,7 @@ const register = async (req, res, next) => {
       const lawyer = await newUser.save().then(console.log("Registered"));
 
       const emailtoken = await new Token({
-        lawyerId: lawyer._id,
+        userId: lawyer._id,
         token: crypto.randomBytes(32).toString("hex"),
       }).save();
       const url = `${process.env.SERVERURL}/lawyer/${lawyer._id}/verify/${emailtoken.token}`;
