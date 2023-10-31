@@ -14,6 +14,11 @@ const appointmentschema = new Schema(
       ref: "User",
       required: true,
     },
+    slotId: {
+      type: Schema.Types.ObjectId,
+      ref: "Slot",
+      required: true,
+    },
     isConsulted: {
       type: Boolean,
       default: false,

@@ -22,6 +22,8 @@ UserRouter.get("/slotsuser",userAuth, SlotController.getSlotsUser);
 UserRouter.get("/forgotpassword", UserController.forgotpassword);
 UserRouter.post("/changepassword", UserController.changepassword);
 UserRouter.post("/addappointment",userAuth,SlotController.addAppointment);
+UserRouter.get("/appointments",userAuth,SlotController.getAppointments);
+UserRouter.put("/cancelappointment",userAuth,SlotController.cancelAppointment);
 
 
 export default UserRouter;

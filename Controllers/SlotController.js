@@ -1,6 +1,6 @@
 import Slot from "../Models/SlotModel.js";
 import Lawyer from "../Models/LawyerModel.js";
-import Appointment from "../Models/AppointmentModel.js"
+import Appointment from "../Models/AppointmentModel.js";
 import moment from "moment";
 import mongoose from "mongoose";
 import User from "../Models/UserModel.js";
@@ -210,7 +210,6 @@ const getSlotDateUser = async (req, res, next) => {
   }
 };
 
-
 const getSlotsUser = async (req, res, next) => {
   try {
     const { date, lawyerId } = req.query;
@@ -253,17 +252,17 @@ const getSlotsUser = async (req, res, next) => {
   }
 };
 
-const addAppointment = async (req,res,next) => {
+const addAppointment = async (req, res, next) => {
   try {
-    const {slId,lawyerId,slTime,slDate} = req.body.data
-    const userId = req.headers.userId
+    const { slId, lawyerId, slTime, slDate } = req.body.data;
+    const userId = req.headers.userId;
 
-    const lawyer = await Lawyer.findById(lawyerId)
+    // const lawyer = await Lawyer.findById(lawyerId);
     const userdata = await User.findById(userId);
     if (userdata.flc < 300) {
-      return res.status(403).json({ created: false, message: "No FLC" });
+      return res.status(403).json({ created: false, message: "You dont have enough FLC" });
     }
-    
+
     const updatedSlot = await Slot.findOneAndUpdate(
       {
         lawyer: lawyerId,
@@ -273,38 +272,136 @@ const addAppointment = async (req,res,next) => {
       },
       { $set: { "slotes.$.isBooked": true } }
     );
-
+    console.log("slotid", slId);
+    if (updatedSlot) console.log("slotid", updatedSlot._id);
     const Appoinment = new Appointment({
       lawyer: lawyerId,
       user: userId,
+      slotId: slId,
       scheduledAt: {
         slotTime: slTime,
         slotDate: slDate,
       },
     });
-      if (Appoinment) {
-        console.log("have appo");
-        await Appoinment.save();
-       const user = await User.findOneAndUpdate(
-          { _id: userId },
-          { $inc: { flc: -300 } },
-          { new: true }
-        );
-           
+    if (Appoinment) {
+      console.log("have appo");
+      await Appoinment.save();
+      const user = await User.findOneAndUpdate(
+        { _id: userId },
+        { $inc: { flc: -300 } },
+        { new: true }
+      );
 
-        return res
-          .status(200)
-          .json({ created: true,data:user, message: "Appoinment added successfully" });
-      }
-
+      return res
+        .status(200)
+        .json({
+          created: true,
+          data: user,
+          message: "Appoinment added successfully",
+        });
+    }
   } catch (error) {
     console.log(error);
-    next(error)
+    next(error);
   }
-}
+};
 
+// const getAppointments = async (req,res,next) => {
+//   try {
+//     const userId = req.headers.userId
+//     const appointments = Appointment.find({user: userId}).populate("lawyer")
+//     if (appointments) {
+//       return res.status(200).json({ data: appointments, message: "success" });
+//     } else {
+//       return res.status(200).json({ message: "somthing went wrong" });
+//     }
+//   } catch (error) {
+//     console.log(error);
+//     next(error)
+//   }
+// }
 
+const getAppointments = async (req, res, next) => {
+  try {
+    const userId = req.headers.userId;
+    const appointments = await Appointment.find({ user: userId })
+      .populate("lawyer")
+      .exec();
 
+    if (appointments) {
+      return res.status(200).json({ data: appointments, message: "success" });
+    } else {
+      return res.status(200).json({ message: "something went wrong" });
+    }
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+const cancelAppointment = async (req, res, next) => {
+  try {
+    const userId = req.headers.userId;
+    const { id, slotId, slotTime } = req.body;
+    console.log("sdjsjdn", req.body);
+    const appointment = await Appointment.findOne({ _id: id }).populate(
+      "lawyer"
+    );
+    const lawyerId = appointment.lawyer._id;
+    let scheduledDate = new Date(appointment.scheduledAt.slotDate);
+
+    let currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    const formattedScheduledDate = moment(scheduledDate).format(
+      "YYYY-MM-DD HH:mm:ss"
+    );
+    const formattedCurrentDate = moment(currentDate).format(
+      "YYYY-MM-DD HH:mm:ss"
+    );
+    console.log("datstgvjsd", formattedCurrentDate, formattedScheduledDate);
+    console.log("not formatd", scheduledDate, currentDate);
+
+    if (formattedScheduledDate > formattedCurrentDate) {
+      const updated = await Appointment.findOneAndUpdate(
+        { _id: id },
+        {
+          $set: {
+            status: "cancelled",
+          },
+        }
+      );
+      if (updated) {
+         const slot = await Slot.findOneAndUpdate(
+           {
+             lawyer: lawyerId,
+             slotes: {
+               $elemMatch: { _id: slotId },
+             },
+           },
+           { $set: { "slotes.$.isBooked": false } }
+         );
+          console.log("slot idd",slot);
+        await User.findByIdAndUpdate({ _id: userId }, { $inc: { flc: 300 } });
+        return res
+          .status(200)
+          .json({ updated: true, message: "your appointment is canceled" });
+      } else {
+        return res.status(200).json({
+          updated: false,
+          message: "somthing went wrong please try later",
+        });
+      }
+    } else {
+      return res
+        .status(200)
+        .json({ message: "You Cant Cancel today Appointment" });
+    }
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
 
 export default {
   addSlot,
@@ -313,4 +410,6 @@ export default {
   getSlotDateUser,
   getSlotsUser,
   addAppointment,
+  getAppointments,
+  cancelAppointment,
 };
