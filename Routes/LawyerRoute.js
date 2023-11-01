@@ -16,4 +16,6 @@ LawyerRoute.post("/imgupdate",lawyerAuth,upload.single("image"), LawyerControlle
 LawyerRoute.post("/addSlot",lawyerAuth,SlotController.addSlot);
 LawyerRoute.get("/slotDate",lawyerAuth,SlotController.getSlotDate)
 LawyerRoute.get("/slots",lawyerAuth,SlotController.getSlots);
+LawyerRoute.get("/appointmentDate", lawyerAuth, SlotController.getAppointmentDate);
+LawyerRoute.get("/appointmentrequest", lawyerAuth, SlotController.appointmentRequest);
 export default LawyerRoute;

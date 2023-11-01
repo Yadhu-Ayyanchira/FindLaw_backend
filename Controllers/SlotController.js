@@ -168,6 +168,7 @@ const getSlots = async (req, res, next) => {
 const getSlotDateUser = async (req, res, next) => {
   try {
     const { lawyerId } = req.query;
+    console.log("sl dat",lawyerId);
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate());
     tomorrow.setHours(0);
@@ -199,7 +200,7 @@ const getSlotDateUser = async (req, res, next) => {
     if (result) {
       const slotArray = result.map((item) => item.slotDates);
       const slotDates = slotArray.flat();
-
+      console.log(slotDates);
       return res.status(200).json({ data: slotDates, message: "success" });
     } else {
       return res.status(200).json({ cmessage: "No slots" });
@@ -213,6 +214,7 @@ const getSlotDateUser = async (req, res, next) => {
 const getSlotsUser = async (req, res, next) => {
   try {
     const { date, lawyerId } = req.query;
+    console.log("law",date,lawyerId);
     if (!date) {
       return res.status(400).json({ message: "Please select a Date" });
     }
@@ -324,6 +326,19 @@ const addAppointment = async (req, res, next) => {
 const getAppointments = async (req, res, next) => {
   try {
     const userId = req.headers.userId;
+    const yesterday = moment().subtract(1, "days").format("YYYY-MM-DDT00:00:00.000[Z]")
+    console.log("yedsdns date",yesterday);
+     await Appointment.updateMany(
+       {
+         user: userId,
+         "scheduledAt.slotDate": { $lte: yesterday },
+       },
+       {
+         $set: {
+           AppoinmentStatus: "expired",
+         },
+       }
+     );
     const appointments = await Appointment.find({ user: userId })
       .populate("lawyer")
       .exec();
@@ -403,6 +418,89 @@ const cancelAppointment = async (req, res, next) => {
   }
 };
 
+
+
+const getAppointmentDate = async (req, res, next) => {
+  try {
+    const lawyerId = req.headers.lawyerId;
+
+    const result = await Appointment.aggregate([
+      {
+        $match: {
+          lawyer: new mongoose.Types.ObjectId(lawyerId),
+        },
+      },
+      { $unwind: "$scheduledAt" },
+      { 
+        $group: {
+          _id: "$scheduledAt.slotDate",
+          appointmentDates: { $addToSet: "$scheduledAt.slotDate" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          appointmentDates: 1,
+        },
+      },
+    ]);
+    if (result) {
+      const mergedDates = result.reduce((results, obj) => {
+        return results.concat(obj.appointmentDates);
+      }, []);
+      return res.status(200).json({ data: mergedDates, message: "success" });
+    } else {
+      return res.status(200).json({ message: "No slots" });
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+
+const appointmentRequest = async (req, res, next) => {
+  try {
+    let { date } = req.query;
+    console.log("date isssss", date);
+    if (!date) {
+      return res.status(400).json({ message: "Please select a Date" });
+    }
+   const formatedDate = moment(date, "YYYY-MM-DD");
+    date = formatedDate.format("YYYY-MM-DDT00:00:00.000[Z]");
+    const lawyerId = req.headers.lawyerId;
+    const yesterday = moment().subtract(1, "days").format("YYYY-MM-DDT00:00:00.000[Z]");
+
+    await Appointment.updateMany(
+      {
+        lawyer: lawyerId,
+        "scheduledAt.slotDate": { $lte: yesterday },
+      },
+      {
+        $set: {
+          AppoinmentStatus: "expired",
+        },
+      }
+    );
+
+    const appointments = await Appointment.find({
+      lawyer: lawyerId,
+      "scheduledAt.slotDate": date,
+    })
+      .populate("user")
+      .exec();
+
+    if (appointments) {
+      console.log("have appointment",appointments);
+      return res.status(200).json({ data: appointments, message: "Success" });
+    } else {
+      return res.status(200).json({ message: "No appointments available" });
+    }
+  } catch (error) {
+    console.log("Error:", error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 export default {
   addSlot,
   getSlotDate,
@@ -412,4 +510,6 @@ export default {
   addAppointment,
   getAppointments,
   cancelAppointment,
+  appointmentRequest,
+  getAppointmentDate,
 };
