@@ -423,15 +423,18 @@ const cancelAppointment = async (req, res, next) => {
 const getAppointmentDate = async (req, res, next) => {
   try {
     const lawyerId = req.headers.lawyerId;
-
+const tomorrow = moment().startOf("day");
+const formattedDate = tomorrow.utc().format("YYYY-MM-DDT00:00:00.000[Z]");
+ console.log("dssdsds",formattedDate);
     const result = await Appointment.aggregate([
       {
         $match: {
           lawyer: new mongoose.Types.ObjectId(lawyerId),
+          "scheduledAt.slotDate": { $gt: formattedDate },
         },
       },
       { $unwind: "$scheduledAt" },
-      { 
+      {
         $group: {
           _id: "$scheduledAt.slotDate",
           appointmentDates: { $addToSet: "$scheduledAt.slotDate" },
