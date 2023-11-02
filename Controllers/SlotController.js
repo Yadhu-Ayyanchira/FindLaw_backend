@@ -55,6 +55,7 @@ const addSlot = async (req, res, next) => {
         slots: createSlots,
       });
       currentDate.setDate(currentDate.getDate() + 1);
+    }
       const slotData = createdSlots.map((slotObj) => {
         return {
           lawyer: lawyerId,
@@ -63,13 +64,14 @@ const addSlot = async (req, res, next) => {
       });
       const savedSlots = await Slot.create(slotData);
       return res.status(200).json({ savedSlots });
-    }
+    
   } catch (error) {
     console.log(error);
     next(error);
   }
 };
 function generateTimeSlots(startTime, endTime, slotDuration, date) {
+  console.log("inside gwnerate tiem slot",startTime, endTime, slotDuration, date);
   const slots = [];
   const end = new Date(`${date} ${endTime}`);
   const start = new Date(` ${date} ${startTime} `);
@@ -374,8 +376,6 @@ const cancelAppointment = async (req, res, next) => {
     const formattedCurrentDate = moment(currentDate).format(
       "YYYY-MM-DD HH:mm:ss"
     );
-    console.log("datstgvjsd", formattedCurrentDate, formattedScheduledDate);
-    console.log("not formatd", scheduledDate, currentDate);
 
     if (formattedScheduledDate > formattedCurrentDate) {
       const updated = await Appointment.findOneAndUpdate(
@@ -461,7 +461,6 @@ const getAppointmentDate = async (req, res, next) => {
 const appointmentRequest = async (req, res, next) => {
   try {
     let { date } = req.query;
-    console.log("date isssss", date);
     if (!date) {
       return res.status(400).json({ message: "Please select a Date" });
     }
@@ -490,7 +489,6 @@ const appointmentRequest = async (req, res, next) => {
       .exec();
 
     if (appointments) {
-      console.log("have appointment",appointments);
       return res.status(200).json({ data: appointments, message: "Success" });
     } else {
       return res.status(200).json({ message: "No appointments available" });
@@ -500,6 +498,41 @@ const appointmentRequest = async (req, res, next) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+const rejectAppointment = async (req,res,next) => {
+  try {
+    const lawyerId = req.headers.lawyerId;
+    const id =req.body.id
+    const appointment = await Appointment.findOne({ _id: id }).populate(
+      "lawyer"
+    );
+    const slotId = appointment.slotId
+    const userId = appointment.user
+    const updated = await Appointment.findOneAndUpdate(
+      { _id:id },
+      { $set: { AppoinmentStatus: "rejected" } },
+    )
+
+    if(updated){
+       await Slot.findOneAndUpdate(
+         {
+           lawyer: lawyerId,
+           slotes: {
+             $elemMatch: { _id: slotId },
+           },
+         },
+         { $set: { "slotes.$.isBooked": false } }
+       );
+      await User.findByIdAndUpdate({ _id: userId }, { $inc: { flc: 300 } });
+       return res.status(200).json({ message: "Rejection Successful!" });
+    }else{
+      return res.status(401).json({ message: "Invalid Request" });
+    }
+  } catch (error) {
+    console.log(error);
+    next(error)
+  }
+}
 
 export default {
   addSlot,
@@ -512,4 +545,5 @@ export default {
   cancelAppointment,
   appointmentRequest,
   getAppointmentDate,
+  rejectAppointment,
 };

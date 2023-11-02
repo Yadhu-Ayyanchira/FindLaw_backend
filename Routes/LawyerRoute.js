@@ -18,4 +18,5 @@ LawyerRoute.get("/slotDate",lawyerAuth,SlotController.getSlotDate)
 LawyerRoute.get("/slots",lawyerAuth,SlotController.getSlots);
 LawyerRoute.get("/appointmentDate", lawyerAuth, SlotController.getAppointmentDate);
 LawyerRoute.get("/appointmentrequest", lawyerAuth, SlotController.appointmentRequest);
+LawyerRoute.put("/rejectappointment",lawyerAuth,SlotController.rejectAppointment);
 export default LawyerRoute;
