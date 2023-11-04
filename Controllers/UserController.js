@@ -8,6 +8,7 @@ import sendMail from "../Utils/SendMail.js";
 import sendOtp from "../Utils/SendOtp.js"
 import crypto from "crypto";
 import uploadToClodinary from "../Utils/Cloudinary.js";
+import Stripe from "stripe";
 
 const signup = async (req, res, next) => {
   try {
@@ -304,6 +305,44 @@ const changepassword = async (req, res, next) => {
   }
 };
 
+const payment = async (req, res, next) => {
+  try {
+    console.log("payment");
+    const stripe = new Stripe(process.env.STRIPE_SECRET);
+
+    const amount = req.params.amount;
+    console.log(amount);
+
+    const paymentintent = await stripe.paymentIntents.create({
+      amount: amount * 100,
+      currency: "inr",
+      automatic_payment_methods: {
+        enabled: true,
+      },
+    });
+    console.log(paymentintent.client_secret);
+    res.status(200).json({
+      clientSecret: paymentintent.client_secret,
+    });
+  } catch (error) {
+    console.log(error);
+    next(error)
+  }
+};
+
+const paymentSuccess = async (req,res,next) => {
+  try {
+    console.log('reached');
+    const {userId,amount} = req.body
+    console.log("payment success",userId,amount);
+    //find user using findbyidandupdate and update flc
+    let user = await User.findByIdAndUpdate({ _id: userId },{$inc:{flc:amount}},{new:true})
+     return res.status(200).json({status:true ,data:user ,message:"Payment successful!"})
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 export default {
   login,
   signup,
@@ -316,4 +355,6 @@ export default {
   lawyerView,
   changepassword,
   forgotpassword,
+  payment,
+  paymentSuccess,
 };

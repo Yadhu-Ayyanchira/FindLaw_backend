@@ -21,11 +21,11 @@ const lawyerSchema = new mongoose.Schema({
   },
   about: {
     type: String,
-    default:"About your self"
+    default: "About your self",
   },
   place: {
     type: String,
-    default: "California"
+    default: "California",
   },
   practice: {
     type: String,
@@ -44,7 +44,11 @@ const lawyerSchema = new mongoose.Schema({
   },
   experience: {
     type: Number,
-    default:0
+    default: 0,
+  },
+  specialised: {
+    type: Array,
+    default: [],
   },
   image: {
     type: String,

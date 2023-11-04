@@ -329,7 +329,6 @@ const getAppointments = async (req, res, next) => {
   try {
     const userId = req.headers.userId;
     const yesterday = moment().subtract(1, "days").format("YYYY-MM-DDT00:00:00.000[Z]")
-    console.log("yedsdns date",yesterday);
      await Appointment.updateMany(
        {
          user: userId,
@@ -464,6 +463,7 @@ const formattedDate = tomorrow.utc().format("YYYY-MM-DDT00:00:00.000[Z]");
 const appointmentRequest = async (req, res, next) => {
   try {
     let { date } = req.query;
+    console.log("date is ",date);
     if (!date) {
       return res.status(400).json({ message: "Please select a Date" });
     }
