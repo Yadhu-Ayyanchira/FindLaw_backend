@@ -26,6 +26,7 @@ UserRouter.get("/appointments",userAuth,SlotController.getAppointments);
 UserRouter.put("/cancelappointment",userAuth,SlotController.cancelAppointment);
 UserRouter.get("/paymentrequest/:id/:amount",userAuth,UserController.payment);
 UserRouter.put("/paymentsuccess", userAuth, UserController.paymentSuccess);
+UserRouter.post("/addreview", userAuth, UserController.addReview);
 
 
 export default UserRouter;

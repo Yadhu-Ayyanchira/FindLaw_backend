@@ -1,6 +1,7 @@
 /* eslint-disable linebreak-style */
 import User from "../Models/UserModel.js";
 import Lawyer from "../Models/LawyerModel.js";
+import Review from "../Models/ReviewModel.js"
 import Token from "../Models/TokenModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -343,6 +344,49 @@ const paymentSuccess = async (req,res,next) => {
   }
 }
 
+const addReview = async (req,res,next) => {
+  try {
+    const {review,id} = req.body
+    const rating = parseInt(req.body.rating);
+    const userId = req.headers.userId;
+    const user = await Review.findOneAndUpdate(
+      { user: userId },
+      {
+        $set: {
+          rating: rating,
+          reviewText: review,
+        },
+      }
+    );
+    if(user){
+      console.log("have user");
+      return res
+        .status(200)
+        .json({ created: true, message: "Your Review is updated" });
+    }
+    console.log("in add revi",rating);
+    const newReview = new Review({
+      user: userId,
+      lawyer: id,
+      reviewText: review,
+      rating: rating,
+    });
+    newReview.save();
+      if (newReview) {
+        return res
+          .status(200)
+          .json({ created: true, message: "Thank You for Your support" });
+      } else {
+        return res
+          .status(200)
+          .json({ created: false, message: "somthing went wrong" });
+      }
+  } catch (error) {
+    console.log(error);
+    next(error)
+  }
+}
+
 export default {
   login,
   signup,
@@ -357,4 +401,5 @@ export default {
   forgotpassword,
   payment,
   paymentSuccess,
+  addReview,
 };
