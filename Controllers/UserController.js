@@ -346,11 +346,13 @@ const paymentSuccess = async (req,res,next) => {
 
 const addReview = async (req,res,next) => {
   try {
+    console.log("add rvw");
     const {review,id} = req.body
     const rating = parseInt(req.body.rating);
     const userId = req.headers.userId;
     const user = await Review.findOneAndUpdate(
-      { user: userId },
+      { user: userId,
+      lawyer : id},
       {
         $set: {
           rating: rating,
@@ -387,6 +389,35 @@ const addReview = async (req,res,next) => {
   }
 }
 
+const getReviews = async (req,res,next) => {
+  try {
+    const {id} = req.query
+   console.log("idsss",id);
+    //find all reviews for this lawyerid
+    const reviews = await Review.find({ lawyer: id })
+     .populate("user", "-password");
+      const count = reviews.length;
+      if (reviews) {
+        let avgRating = 0;
+         const totalRating = reviews.reduce(
+        (total, review) => total + review.rating, 0
+      );
+      const avgRatingStr = (totalRating / count).toFixed(1);
+      avgRating = Number(avgRatingStr);
+      console.log("done",reviews);
+      return res.status(200).json({data:reviews,count:count,avgRating:avgRating})
+      
+    } else {
+      console.log("not done");
+      return res.status(200).json({count:count,avgRating:0})
+      
+    }
+  } catch (error) {
+    console.log(error);
+    next(error)
+  }
+}
+
 export default {
   login,
   signup,
@@ -402,4 +433,5 @@ export default {
   payment,
   paymentSuccess,
   addReview,
+  getReviews,
 };
