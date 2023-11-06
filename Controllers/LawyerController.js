@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import sendMail from "../Utils/SendMail.js";
 import crypto from "crypto";
 import uploadToClodinary from "../Utils/Cloudinary.js";
+import Appoinment from "../Models/AppointmentModel.js";
 
 const register = async (req, res, next) => {
   try {
@@ -247,6 +248,33 @@ const updateImage = async (req, res, next) => {
   }
 };
 
+const createRoom = async (req, res, next) => {
+  try {
+    console.log("create room");
+    const { userName, name, id } = req.query;
+    console.log("id isss", userName, id);
+    const url = `zego${name}@${userName}`;
+    console.log("url is ", url);
+    const updated = await Appoinment.findOneAndUpdate(
+      { _id: id },
+      { $set: { callId: url } }
+    );
+    if (updated) {
+      console.log("updated");
+      return res
+        .status(200)
+        .json({ created: true, url, message: "Link created" });
+    } else {
+      return res
+        .status(403)
+        .json({ created: false, message: "Failed to create link" });
+    }
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
 export default {
   register,
   verification,
@@ -256,4 +284,5 @@ export default {
   profileEdit,
   aboutEdit,
   updateImage,
+  createRoom,
 };
