@@ -224,14 +224,25 @@ const updateImage = async (req, res, next) => {
 };
 const lawyerData = async (req, res, next) => {
   try {
-    const { page, filter, search } = req.query;
+    const { page, filter, search, starRating } = req.query;
     const query = { is_approved: true };
+    console.log("filter is ",filter);
+    console.log("star is ",starRating);
 
     if (search) {
       query.$or = [
         { name: { $regex: new RegExp(search, "i") } },
         { place: { $regex: new RegExp(search, "i") } },
       ];
+    }
+
+    if (starRating) {
+      console.log("starrr",starRating);
+      query.rating = { $gte: parseInt(starRating) };
+    }
+
+    if (filter && !isNaN(filter)) {
+      query.experience = { $gte: parseInt(filter) };
     }
     const perPage = 4;
     const skip = (page - 1) * perPage;
@@ -404,11 +415,15 @@ const getReviews = async (req,res,next) => {
       );
       const avgRatingStr = (totalRating / count).toFixed(1);
       avgRating = Number(avgRatingStr);
-      console.log("done",reviews);
+      //find the lawyer and update rating to avgrating
+      await Lawyer.updateOne(
+        { _id: id },
+        { $set: { rating: avgRating } },
+        {upsert:true}
+        )
       return res.status(200).json({data:reviews,count:count,avgRating:avgRating})
       
     } else {
-      console.log("not done");
       return res.status(200).json({count:count,avgRating:0})
       
     }
