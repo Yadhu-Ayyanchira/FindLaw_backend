@@ -137,7 +137,6 @@ const approveLawyer = async (req, res, next) => {
 const manageUsers = async (req, res, next) => {
   try {
     const id = req.params.id;
-    console.log("user id", id);
     const user = await User.findById(id);
     if (user) {
       await User.updateOne(
