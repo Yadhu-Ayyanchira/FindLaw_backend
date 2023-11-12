@@ -29,12 +29,12 @@ const appointmentschema = new Schema(
     },
     status: {
       type: String,
-      enum: ["consulted", "cancelled", "notConsulted","rejected"],
+      enum: ["consulted", "cancelled", "notConsulted", "rejected"],
       default: "notConsulted",
     },
     AppoinmentStatus: {
       type: String,
-      enum: ["active", "expired"],
+      enum: ["active", "expired", "rejected", "consulted", "cancelled"],
       default: "active",
     },
     scheduledAt: {

@@ -12,6 +12,7 @@ AdminRout.get('/lawyerRequests', adminAuth, AdminController.getLawyerRequests);
 AdminRout.put('/managelawyer/:id', adminAuth, AdminController.manageLawyers);
 AdminRout.put('/manageuser/:id', adminAuth, AdminController.manageUsers);
 AdminRout.put('/approvelawyer/:id', adminAuth, AdminController.approveLawyer);
+AdminRout.get('/gettodays', adminAuth, AdminController.getTodaysAppointment);
 
 
 export default AdminRout;

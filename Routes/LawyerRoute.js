@@ -19,5 +19,7 @@ LawyerRoute.get("/slots",lawyerAuth,SlotController.getSlots);
 LawyerRoute.get("/appointmentDate", lawyerAuth, SlotController.getAppointmentDate);
 LawyerRoute.get("/appointmentrequest", lawyerAuth, SlotController.appointmentRequest);
 LawyerRoute.put("/rejectappointment",lawyerAuth,SlotController.rejectAppointment);
-LawyerRoute.get("/createroom", lawyerAuth, LawyerController.createRoom);
+LawyerRoute.post("/sharelink", lawyerAuth, LawyerController.shareLink);
+LawyerRoute.get("/dashboarddata", lawyerAuth, LawyerController.dashboardData);
+LawyerRoute.put("/callupdate/:appointmentId", lawyerAuth, LawyerController.callUpdate);
 export default LawyerRoute;

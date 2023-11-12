@@ -1,5 +1,6 @@
 /* eslint-disable linebreak-style */
 import Lawyer from "../Models/LawyerModel.js";
+import Appointment from "../Models/AppointmentModel.js";
 import Token from "../Models/TokenModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -99,7 +100,7 @@ const SignupWithGoogle = async (req, res, next) => {
         { lawyerId: user._id, role: "lawyer" },
         process.env.JWTKEY_LAWYER,
         {
-          // expiresIn: "24hr",
+          expiresIn: "24hr",
         }
       );
       return res.status(200).json({
@@ -143,7 +144,7 @@ const login = async (req, res, next) => {
       { lawyerId: user._id, role: "lawyer" },
       process.env.JWTKEY_LAWYER,
       {
-        // expiresIn: "24hr",
+        expiresIn: "24hr",
       }
     );
     return res.status(200).json({
@@ -248,32 +249,62 @@ const updateImage = async (req, res, next) => {
   }
 };
 
-const createRoom = async (req, res, next) => {
+const shareLink = async (req, res, next) => {
   try {
-    console.log("create room");
-    const { userName, name, id } = req.query;
-    console.log("id isss", userName, id);
-    const url = `zego${name}@${userName}`;
-    console.log("url is ", url);
-    const updated = await Appoinment.findOneAndUpdate(
+    const { link, id } = req.body;
+    const updatedAppointment = await Appointment.findOneAndUpdate(
       { _id: id },
-      { $set: { callId: url } }
-    );
-    if (updated) {
-      console.log("updated");
-      return res
-        .status(200)
-        .json({ created: true, url, message: "Link created" });
-    } else {
-      return res
-        .status(403)
-        .json({ created: false, message: "Failed to create link" });
-    }
+      {
+        $set: {
+          callId: link,
+        },
+      }
+    )
+       if (updatedAppointment) {
+         return res.status(200).json({ created: true });
+       } else {
+         return res.status(200).json({ created: false });
+       }
   } catch (error) {
     console.log(error);
     next(error);
   }
 };
+
+const dashboardData = async (req, res, next) => {
+  try {
+    const lawyerId = req.headers.lawyerId;
+    console.log("okokokokokoko", lawyerId);
+    const appointmentCount = await Appointment.find().countDocuments();
+    const rejectCount = await Appointment.find({lawyer: lawyerId, AppoinmentStatus: "rejected",}).countDocuments();
+    const consultCount = await Appointment.find({lawyer: lawyerId, AppoinmentStatus: "consulted",}).countDocuments();
+    console.log("dsswswsws", consultCount);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+const callUpdate = async (req,res,next) => {
+  try {
+    console.log("im doem");
+    const appointmentId=req.params.appointmentId
+    console.log("sdkmedmedkmekdmekmde",appointmentId);
+    const appoiment =await Appoinment.updateOne(
+      {_id : appointmentId},
+      {$set:{AppoinmentStatus : "consulted"}}
+    )
+    if(!appoiment){
+      return res.status(201).send({ message: "success" });
+      }else{
+      return res.status(201).send({message:'success'})
+    }
+    
+  } catch (error) {
+   console.log(error); 
+   next(error)
+  }
+}
 
 export default {
   register,
@@ -284,5 +315,7 @@ export default {
   profileEdit,
   aboutEdit,
   updateImage,
-  createRoom,
+  shareLink,
+  dashboardData,
+  callUpdate,
 };

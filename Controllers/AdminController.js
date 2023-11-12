@@ -1,8 +1,10 @@
 /* eslint-disable linebreak-style */
 import User from "../Models/UserModel.js";
 import Lawyer from "../Models/LawyerModel.js";
+import Appointment from "../Models/AppointmentModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import moment from "moment";
 
 const login = async (req, res, next) => {
   try {
@@ -154,6 +156,29 @@ const manageUsers = async (req, res, next) => {
   }
 };
 
+const getTodaysAppointment = async (req, res, next) => {
+  console.log("in tdys", moment().format("YYYY-MM-DDT00:00:00.000[Z]"));
+  try {
+    const userCount = await User.find().countDocuments();
+    const lawyerCount = await Lawyer.find().countDocuments();
+    const appointmentCount = await Appointment.find({}).countDocuments();
+    console.log("count if appo",appointmentCount);
+    const appointments = await Appointment.find({
+      "scheduledAt.slotDate": moment().format("YYYY-MM-DDT00:00:00.000[Z]"),
+    })
+      .populate("user")
+      .exec();
+    if (appointments) {
+      return res.status(200).json({ data: appointments, userCount, lawyerCount, appointmentCount, message: "Success" });
+    } else {
+      return res.status(200).json({ message: "No appointments available" });
+    }
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
 export default {
   login,
   getUsers,
@@ -162,4 +187,5 @@ export default {
   manageUsers,
   getLawyerRequests,
   approveLawyer,
+  getTodaysAppointment,
 };

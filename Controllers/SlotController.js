@@ -276,7 +276,6 @@ const addAppointment = async (req, res, next) => {
       },
       { $set: { "slotes.$.isBooked": true } }
     );
-    console.log("slotid", slId);
     if (updatedSlot) console.log("slotid", updatedSlot._id);
     const Appoinment = new Appointment({
       lawyer: lawyerId,
@@ -288,7 +287,6 @@ const addAppointment = async (req, res, next) => {
       },
     });
     if (Appoinment) {
-      console.log("have appo");
       await Appoinment.save();
       const user = await User.findOneAndUpdate(
         { _id: userId },
@@ -310,20 +308,6 @@ const addAppointment = async (req, res, next) => {
   }
 };
 
-// const getAppointments = async (req,res,next) => {
-//   try {
-//     const userId = req.headers.userId
-//     const appointments = Appointment.find({user: userId}).populate("lawyer")
-//     if (appointments) {
-//       return res.status(200).json({ data: appointments, message: "success" });
-//     } else {
-//       return res.status(200).json({ message: "somthing went wrong" });
-//     }
-//   } catch (error) {
-//     console.log(error);
-//     next(error)
-//   }
-// }
 
 const getAppointments = async (req, res, next) => {
   try {
@@ -337,6 +321,7 @@ const getAppointments = async (req, res, next) => {
        {
          $set: {
            AppoinmentStatus: "expired",
+           
          },
        }
      );
@@ -382,6 +367,7 @@ const cancelAppointment = async (req, res, next) => {
         {
           $set: {
             status: "cancelled",
+            AppoinmentStatus: "cancelled",
           },
         }
       );
@@ -483,10 +469,12 @@ const appointmentRequest = async (req, res, next) => {
         },
       }
     );
+    
 
     const appointments = await Appointment.find({
       lawyer: lawyerId,
       "scheduledAt.slotDate": date,
+      AppoinmentStatus: { $in: ["active", "rejected"] },
     })
       .populate("user")
       .exec();
