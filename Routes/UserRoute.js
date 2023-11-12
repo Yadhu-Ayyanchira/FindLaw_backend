@@ -28,6 +28,7 @@ UserRouter.get("/paymentrequest/:id/:amount",userAuth,UserController.payment);
 UserRouter.put("/paymentsuccess", userAuth, UserController.paymentSuccess);
 UserRouter.post("/addreview", userAuth, UserController.addReview);
 UserRouter.get("/getreviews", userAuth, UserController.getReviews);
+UserRouter.get("/homedata", UserController.getHomeData);
 
 
 export default UserRouter;

@@ -377,7 +377,6 @@ const addReview = async (req,res,next) => {
         .status(200)
         .json({ created: true, message: "Your Review is updated" });
     }
-    console.log("in add revi",rating);
     const newReview = new Review({
       user: userId,
       lawyer: id,
@@ -433,6 +432,21 @@ const getReviews = async (req,res,next) => {
   }
 }
 
+const getHomeData = async (req,res,next) => {
+  try {
+    console.log("h9me data");
+    const topLawyers = await Lawyer.find().sort({ rating: -1 }).limit(3);
+    if(topLawyers){
+      return res.status(200).json({topLawyers});
+    }else{
+      return res.status(404).json({message:"No lawyers found"})
+    }
+  } catch (error) {
+    console.log(error);
+    next(error)
+  }
+}
+
 export default {
   login,
   signup,
@@ -449,4 +463,5 @@ export default {
   paymentSuccess,
   addReview,
   getReviews,
+  getHomeData,
 };
