@@ -306,6 +306,52 @@ const callUpdate = async (req,res,next) => {
   }
 }
 
+const addExpertise = async (req, res, next) => {
+  try {
+    const { data } = req.body;
+    const lawyerId = req.headers.lawyerId;
+
+    const updatedLawyer = await Lawyer.findOneAndUpdate(
+      { _id: lawyerId },
+      {
+        $push: { specialised: data },
+      },
+      { new: true }
+    );
+
+    if (updatedLawyer) {
+      return res.status(200).json({ created: true, lawyer: updatedLawyer });
+    } else {
+      return res.status(200).json({ created: false });
+    }
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+const removeExpertise = async (req, res, next) => {
+  try {
+    const { data } = req.body;
+    const lawyerId = req.headers.lawyerId;
+    const updatedLawyer = await Lawyer.findOneAndUpdate(
+      { _id: lawyerId },
+      {
+        $pull: { specialised: data },
+      },
+      { new: true }
+    );
+
+    if (updatedLawyer) {
+      return res.status(200).json({ created: true, lawyer: updatedLawyer });
+    } else {
+      return res.status(200).json({ created: false });
+    }
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
 export default {
   register,
   verification,
@@ -318,4 +364,6 @@ export default {
   shareLink,
   dashboardData,
   callUpdate,
+  addExpertise,
+  removeExpertise,
 };

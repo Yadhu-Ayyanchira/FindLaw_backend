@@ -22,4 +22,6 @@ LawyerRoute.put("/rejectappointment",lawyerAuth,SlotController.rejectAppointment
 LawyerRoute.post("/sharelink", lawyerAuth, LawyerController.shareLink);
 LawyerRoute.get("/dashboarddata", lawyerAuth, LawyerController.dashboardData);
 LawyerRoute.put("/callupdate/:appointmentId", lawyerAuth, LawyerController.callUpdate);
+LawyerRoute.post("/addexpertise", lawyerAuth, LawyerController.addExpertise);
+LawyerRoute.post("/removeexpertise", lawyerAuth, LawyerController.removeExpertise);
 export default LawyerRoute;
