@@ -14,7 +14,7 @@ UserRouter.post('/googleSignup', UserController.SignupWithGoogle);
 UserRouter.get('/:id/verify/:token', UserController.verification);
 UserRouter.get('/userData/:id',userAuth, UserController.userData);
 UserRouter.post('/profileEdit/:id',userAuth, UserController.profileEdit);
-UserRouter.post('/imgupdate', upload.single('image'), UserController.updateImage);
+UserRouter.post('/imgupdate',userAuth, upload.single('image'), UserController.updateImage);
 UserRouter.get('/lawyerData', UserController.lawyerData);
 UserRouter.get('/lawyerView', UserController.lawyerView);
 UserRouter.get("/slotdate",userAuth, SlotController.getSlotDateUser);
