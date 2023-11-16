@@ -226,9 +226,6 @@ const lawyerData = async (req, res, next) => {
   try {
     const { page, filter, search, starRating } = req.query;
     const query = { is_approved: true };
-    console.log("filter is ",filter);
-    console.log("star is ",starRating);
-
     if (search) {
       query.$or = [
         { name: { $regex: new RegExp(search, "i") } },
@@ -237,7 +234,6 @@ const lawyerData = async (req, res, next) => {
     }
 
     if (starRating) {
-      console.log("starrr",starRating);
       query.rating = { $gte: parseInt(starRating) };
     }
 
@@ -434,7 +430,6 @@ const getReviews = async (req,res,next) => {
 
 const getHomeData = async (req,res,next) => {
   try {
-    console.log("h9me data");
     const topLawyers = await Lawyer.find().sort({ rating: -1 }).limit(3);
     if(topLawyers){
       return res.status(200).json({topLawyers});
