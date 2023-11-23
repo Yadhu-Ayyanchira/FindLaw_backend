@@ -8,9 +8,7 @@ import moment from "moment";
 
 const login = async (req, res, next) => {
   try {
-    console.log("wyd");
     const { email, password } = req.body;
-    console.log("object", email);
     const admin = await User.findOne({ email });
     if (!admin) {
       return res.status(201).json({ access: false, message: "User not found" });
@@ -28,7 +26,6 @@ const login = async (req, res, next) => {
         .status(201)
         .json({ access: false, message: "You are not admin!!!" });
     } else {
-      console.log("yesss", process.env.JWTKEY_ADMIN);
       const token = jwt.sign(
         { adminId: admin._id, role: "admin" },
         process.env.JWTKEY_ADMIN,
@@ -44,6 +41,7 @@ const login = async (req, res, next) => {
         .json({ access: true, token, info, message: "Logged in successfully" });
     }
   } catch (err) {
+    console.log(err);
     next(err);
   }
 };
@@ -126,7 +124,6 @@ const getLawyerRequests = async (req, res, next) => {
 };
 const approveLawyer = async (req, res, next) => {
   try {
-    console.log("approve lawyer");
     const id = req.params.id;
     await Lawyer.findByIdAndUpdate(id, { is_approved: true });
     res.status(200).json({ message: "Lawyer Approved" });
@@ -157,12 +154,10 @@ const manageUsers = async (req, res, next) => {
 };
 
 const getTodaysAppointment = async (req, res, next) => {
-  console.log("in tdys", moment().format("YYYY-MM-DDT00:00:00.000[Z]"));
   try {
     const userCount = await User.find().countDocuments();
     const lawyerCount = await Lawyer.find().countDocuments();
     const appointmentCount = await Appointment.find({}).countDocuments();
-    console.log("count if appo",appointmentCount);
     const appointments = await Appointment.find({
       "scheduledAt.slotDate": moment().format("YYYY-MM-DDT00:00:00.000[Z]"),
     })

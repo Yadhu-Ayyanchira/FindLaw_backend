@@ -111,7 +111,6 @@ const login = async (req, res, next) => {
         expiresIn: "24hr",
       }
     );
-    // const { pass, ...info } = user._doc;
 
     return res.status(200).json({
       access: true,

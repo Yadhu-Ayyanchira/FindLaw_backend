@@ -11,11 +11,9 @@ import Appoinment from "../Models/AppointmentModel.js";
 
 const register = async (req, res, next) => {
   try {
-    console.log("in lawyer Reg");
     const { name, email, password, mobile } = req.body;
     const exists = await Lawyer.findOne({ email: email });
     if (exists) {
-      console.log("email already exists");
       return res
         .status(200)
         .json({ message: "Email already Exists", created: false });
@@ -274,11 +272,11 @@ const shareLink = async (req, res, next) => {
 const dashboardData = async (req, res, next) => {
   try {
     const lawyerId = req.headers.lawyerId;
-    console.log("okokokokokoko", lawyerId);
     const appointmentCount = await Appointment.find().countDocuments();
     const rejectCount = await Appointment.find({lawyer: lawyerId, AppoinmentStatus: "rejected",}).countDocuments();
     const consultCount = await Appointment.find({lawyer: lawyerId, AppoinmentStatus: "consulted",}).countDocuments();
     console.log("dsswswsws", consultCount);
+    return res.status(200).json({appointments: appointmentCount, consulted: consultCount, rejected: rejectCount,});
   } catch (error) {
     console.log(error);
     next(error);
